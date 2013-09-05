@@ -1,0 +1,17 @@
+{
+	"name": "patrickyan/balanced",
+	"description": "Balanced Payments extension for Symphony CMS",
+	"homepage": "http://patrickyan.net",
+	"authors": [
+	  {
+	    "name": "Patrick Yan",
+	    "homepage": "https://github.com/patrickyan"
+	  }
+	],
+	"config": {
+	    "vendor-dir": "lib"
+	},
+	"require": {
+		"balanced/balanced": "*"
+	}
+}
