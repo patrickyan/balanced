@@ -357,9 +357,9 @@ class Extension_Balanced extends Extension {
 	}
 
 	public function install() {
-		// Create balanced_customer_id field database:
+		// Create balanced_customer_uri field database:
 		Symphony::Database()->query("
-			CREATE TABLE IF NOT EXISTS `tbl_fields_balanced_customer_id` (
+			CREATE TABLE IF NOT EXISTS `tbl_fields_balanced_customer_uri` (
 			 `id` INT(11) unsigned NOT NULL AUTO_INCREMENT,
 			  `field_id` INT(11) unsigned NOT NULL,
 			  `validator` VARCHAR(255) COLLATE utf8_unicode_ci DEFAULT NULL,
@@ -385,7 +385,7 @@ class Extension_Balanced extends Extension {
 
 	public function uninstall() {
 		// Drop field tables:
-		Symphony::Database()->query("DROP TABLE `tbl_fields_balanced_customer_id`");
+		Symphony::Database()->query("DROP TABLE `tbl_fields_balanced_customer_uri`");
 		Symphony::Database()->query("DROP TABLE `tbl_fields_balanced_customer_link`");
 
 		// Clean configuration

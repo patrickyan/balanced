@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<extension status="experimental" id="stripe" xmlns="http://symphony-cms.com/schemas/extension/1.0">
+<extension status="experimental" id="balanced" xmlns="http://symphony-cms.com/schemas/extension/1.0">
 	<name>Balanced</name>
 	<description>Balanced Payments extension for Symphony CMS. This extension allows direct access to Balanced's API using Symphony CMS concepts.</description>
 	<repo type="github">https://github.com/patrickyan/balanced</repo>
