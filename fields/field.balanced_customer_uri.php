@@ -33,7 +33,7 @@ Class FieldBalanced_Customer_URI extends FieldInput {
 	public function findCustomerUriFromEntryId($data) {
 		$field = Symphony::Database()->fetchRow(0, "
 				SELECT `id` FROM `tbl_fields`
-				WHERE `type` = 'stripe_customer_uri'
+				WHERE `type` = 'balanced_customer_uri'
 				LIMIT 1"
 		);
 
