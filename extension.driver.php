@@ -88,7 +88,7 @@ class Extension_Balanced extends Extension {
 		}
 
 		if(!$proceed) return true;
-//        print_r($_POST); die();
+		//print_r($_POST); die();
 
 		if(!isset($_SESSION['symphony-balanced'])) {
 
@@ -274,11 +274,11 @@ class Extension_Balanced extends Extension {
 		if (!empty($balanced)) {
 			// Convert balanced object to array so that it can be looped
 			if(is_object($balanced)) {
-				$balanced = $balanced->__toArray();
+				$balanced = Balanced_General::convertObjectToArray($balanced);
 
 				foreach($balanced as $key => $val){
 					if(is_object($val)) {
-						$balanced[$key] = $val->__toArray();
+						$balanced[$key] = Balanced_General::convertObjectToArray($val);
 					}
 				}
 			}
