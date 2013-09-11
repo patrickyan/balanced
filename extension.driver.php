@@ -1,343 +1,406 @@
 <?php
 
-//require_once(EXTENSIONS . '/stripe/lib/class.stripegeneral.php');
+require_once(EXTENSIONS . '/balanced/lib/class.balancedgeneral.php');
 
 class Extension_Balanced extends Extension {
 
-    /*-------------------------------------------------------------------------
-        Delegates:
-    -------------------------------------------------------------------------*/
+	/*-------------------------------------------------------------------------
+		Delegates:
+	-------------------------------------------------------------------------*/
 
-    public function getSubscribedDelegates() {
-        return array(
-            array(
-                'page' => '/blueprints/events/',
-                'delegate' => 'EventPreEdit',
-                'callback' => 'actionEventPreEdit'
-            ),
-            array(
-                'page' => '/blueprints/events/new/',
-                'delegate' => 'AppendEventFilter',
-                'callback' => 'actionAppendEventFilter'
-            ),
-            array(
-                'page' => '/blueprints/events/edit/',
-                'delegate' => 'AppendEventFilter',
-                'callback' => 'actionAppendEventFilter'
-            ),
-            array(
-                'page' => '/blueprints/events/',
-                'delegate' => 'AppendEventFilterDocumentation',
-                'callback' => 'actionAppendEventFilterDocumentation'
-            ),
-            array(
-                'page' => '/frontend/',
-                'delegate' => 'EventPreSaveFilter',
-                'callback' => 'actionEventPreSaveFilter'
-            ),
-            array(
-                'page' => '/frontend/',
-                'delegate' => 'EventPostSaveFilter',
-                'callback' => 'actionEventPostSaveFilter'
-            ),
-            array(
-                'page' => '/system/preferences/',
-                'delegate' => 'AddCustomPreferenceFieldsets',
-                'callback' => 'actionAddCustomPreferenceFieldsets'
-            ),
-            array(
-                'page' => '/system/preferences/',
-                'delegate' => 'Save',
-                'callback' => 'actionSave'
-            )
-        );
-    }
+	public function getSubscribedDelegates() {
+		return array(
+			array(
+				'page' => '/blueprints/events/',
+				'delegate' => 'EventPreEdit',
+				'callback' => 'actionEventPreEdit'
+			),
+			array(
+				'page' => '/blueprints/events/new/',
+				'delegate' => 'AppendEventFilter',
+				'callback' => 'actionAppendEventFilter'
+			),
+			array(
+				'page' => '/blueprints/events/edit/',
+				'delegate' => 'AppendEventFilter',
+				'callback' => 'actionAppendEventFilter'
+			),
+			array(
+				'page' => '/blueprints/events/',
+				'delegate' => 'AppendEventFilterDocumentation',
+				'callback' => 'actionAppendEventFilterDocumentation'
+			),
+			array(
+				'page' => '/frontend/',
+				'delegate' => 'EventPreSaveFilter',
+				'callback' => 'actionEventPreSaveFilter'
+			),
+			array(
+				'page' => '/frontend/',
+				'delegate' => 'EventPostSaveFilter',
+				'callback' => 'actionEventPostSaveFilter'
+			),
+			array(
+				'page' => '/system/preferences/',
+				'delegate' => 'AddCustomPreferenceFieldsets',
+				'callback' => 'actionAddCustomPreferenceFieldsets'
+			),
+			array(
+				'page' => '/system/preferences/',
+				'delegate' => 'Save',
+				'callback' => 'actionSave'
+			)
+		);
+	}
 
-    /*-------------------------------------------------------------------------
-        Definition:
-    -------------------------------------------------------------------------*/
+	/*-------------------------------------------------------------------------
+		Definition:
+	-------------------------------------------------------------------------*/
 
-/*    public function actionEventPreEdit($context) {
-        // Your code goes here...
-    }
+	public function actionEventPreEdit($context) {
+		// Your code goes here...
+	}
 
-    public function actionAppendEventFilter($context) {
-        $filters = Stripe_General::getAllFilters();
+	public function actionAppendEventFilter($context) {
+		$filters = Balanced_General::getAllFilters();
 
-        foreach ($filters as $key => $val) {
-            if (is_array($context['selected'])) {
-                $selected = in_array($key, $context['selected']);
-                $context['options'][] = array($key, $selected, $val);
-            }
-        }
-    }
+		foreach ($filters as $key => $val) {
+			if (is_array($context['selected'])) {
+				$selected = in_array($key, $context['selected']);
+				$context['options'][] = array($key, $selected, $val);
+			}
+		}
+	}
 
-    public function actionAppendEventFilterDocumentation($context) {
-        // Todo not firing
-        var_dump($context);
-    }
+	public function actionAppendEventFilterDocumentation($context) {
+		// Todo not firing
+		var_dump($context);
+	}
 
-    public function actionEventPreSaveFilter($context) {
-        $filters = $context['event']->eParamFILTERS;
-        $proceed = false;
+	public function actionEventPreSaveFilter($context) {
+		$filters = $context['event']->eParamFILTERS;
+		$proceed = false;
 
-        foreach ($filters as $key => $val) {
-            if (in_array($val, array_keys(Stripe_General::getAllFilters()))) {
-                $proceed = true;
-            }
-        }
+		foreach ($filters as $key => $val) {
+			if (in_array($val, array_keys(Balanced_General::getAllFilters()))) {
+				$proceed = true;
+			}
+		}
 
-        if(!$proceed) return true;
+		if(!$proceed) return true;
 //        print_r($_POST); die();
 
-        if(!isset($_SESSION['symphony-stripe'])) {
-            require_once(EXTENSIONS . '/stripe/lib/api/lib/Stripe.php');
-            Stripe::setApiKey(Stripe_General::getApiKey());
+		if(!isset($_SESSION['symphony-balanced'])) {
 
-            $fields = $_POST['stripe'];
+			Balanced\Settings::$api_key = Balanced_General::getApiKey();
 
-            // Convert handles if Symphony standard
-            foreach ($fields as $key => $val) {
-                $key = str_replace('-', '_', $key);
-                $fields[$key] = $val;
-            }
+			$fields = $_POST['balanced'];
 
-            foreach ($filters as $key => $val) {
-                if (in_array($val, array_keys(Stripe_General::getAllFilters()))) {
+			// Convert handles if Symphony standard
+			foreach ($fields as $key => $val) {
+				$key = str_replace('-', '_', $key);
+				$fields[$key] = $val;
+			}
 
-                    try {
-                        switch($val) {
-                            case 'Stripe_Customer-create':
-                                $stripe = Stripe_Customer::create($fields);
-                                break;
-                            case 'Stripe_Customer-retrieve-update':
-                                $stripe = Stripe_Customer::retrieve($fields['id']);
-                                unset($fields['id']);
-                                $stripe = Stripe_General::setStripeFieldsToUpdate($stripe, $fields);
-                                $stripe = $stripe->save();
-                                break;
-                            case 'Stripe_Customer-retrieve-delete':
-                                $stripe = Stripe_Customer::retrieve($fields['id']);
-                                $stripe = $stripe->delete();
-                                break;
-                            case 'Stripe_Customer-retrieve-updateSubscription':
-                                $stripe = Stripe_Customer::retrieve($fields['id']);
-                                unset($fields['id']);
-                                $stripe = $stripe->updateSubscription($fields);
-                                break;
-                            case 'Stripe_Customer-retrieve-cancelSubscription':
-                                $stripe = Stripe_Customer::retrieve($fields['id']);
-                                $stripe = $stripe->cancelSubscription();
-                                break;
-                            case 'Stripe_Customer-retrieve-deleteDiscount':
-                                $stripe = Stripe_Customer::retrieve($fields['id']);
-                                $stripe = $stripe->deleteDiscount();
-                                break;
-                            case 'Stripe_Charge-create':
-                                $stripe = Stripe_Charge::create($fields);
-                                break;
-                            case 'Stripe_Charge-retrieve-refund':
-                                $stripe = Stripe_Charge::retrieve($fields['id']);
-                                $stripe = $stripe->refund();
-                                break;
-                            case 'Stripe_InvoiceItem-create':
-                                $stripe = Stripe_InvoiceItem::create($fields);
-                                break;
-                            case 'Stripe_Invoice-create':
-                                $stripe = Stripe_Invoice::create($fields);
-                                break;
-                            case 'Stripe_InvoiceItem-retrieve-update':
-                                $stripe = Stripe_InvoiceItem::retrieve($fields['id']);
-                                unset($fields['id']);
-                                $stripe = Stripe_General::setStripeFieldsToUpdate($stripe, $fields);
-                                $stripe = $stripe->save();
-                                break;
-                            case 'Stripe_Invoice-retrieve-closed':
-                                $stripe = Stripe_Invoice::retrieve($fields['id']);
-                                $stripe->closed;
-                                $stripe = $stripe->save();
-                                break;
-                            case 'Stripe_InvoiceItem-retrieve-delete':
-                                $stripe = Stripe_InvoiceItem::retrieve($fields['id']);
-                                $stripe = $stripe->delete();
-                                break;
-                            case 'Stripe_Invoice-retrieve-pay':
-                                $stripe = Stripe_Invoice::retrieve($fields['id']);
-                                $stripe = $stripe->pay();
-                                break;
-                        }
-                    } catch (Stripe_InvalidRequestError $e) {
-                        // Invalid parameters were supplied to Stripe's API
-                        $context['messages'][] = array('stripe', false, $e->getMessage());
-                        Stripe_General::emailPrimaryDeveloper($e->getMessage());
-                        return $context;
-                    } catch (Stripe_AuthenticationError $e) {
-                        // Authentication with Stripe's API failed
-                        // (maybe you changed API keys recently)
-                        $context['messages'][] = array('stripe', false, $e->getMessage());
-                        Stripe_General::emailPrimaryDeveloper($e->getMessage());
-                        return $context;
-                    } catch (Stripe_ApiConnectionError $e) {
-                        // Network communication with Stripe failed
-                        $context['messages'][] = array('stripe', false, $e->getMessage());
-                        Stripe_General::emailPrimaryDeveloper($e->getMessage());
-                        return $context;
-                    } catch (Stripe_Error $e) {
-                        // Display a very generic error to the user, and maybe send
-                        $context['messages'][] = array('stripe', false, $e->getMessage());
-                        Stripe_General::emailPrimaryDeveloper($e->getMessage());
-                        return $context;
-                    } catch (Exception $e) {
-                        // Something else happened, completely unrelated to Stripe
-                        $context['messages'][] = array('stripe', false, $e->getMessage());
-                        Stripe_General::emailPrimaryDeveloper($e->getMessage());
-                        return $context;
-                    }
-                }
-            }
+			foreach ($filters as $key => $val) {
+				if (in_array($val, array_keys(Balanced_General::getAllFilters()))) {
 
-        } else {
-            $stripe = unserialize($_SESSION['symphony-stripe']);
+					try {
+						switch($val) {
+							case 'Balanced_Customer-create':
+								$balanced = new Balanced\Customer($fields);
+								$balanced = $balanced->save();
+								break;
+							case 'Balanced_Customer-create-addCard':
+								$balanced = new Balanced\Customer($fields);
+								$balanced->addCard($fields['card_uri']);
+								$balanced = $balanced->save();
+								break;
+							case 'Balanced_Customer-create-addBankAccount':
+								$balanced = new Balanced\Customer($fields);
+								$balanced->addBankAccount($fields['bank_account_uri']);
+								$balanced = $balanced->save();
+								break;
+							case 'Balanced_Customer-update':
+								$balanced = Balanced\Customer::get($fields['customer_uri']);
+								unset($fields['id']);
+								$balanced = Balanced_General::setBalancedFieldsToUpdate($balanced, $fields);
+								$balanced = $balanced->save();
+								break;
+							case 'Balanced_Customer-delete':
+								$balanced = Balanced\Customer::get($fields['customer_uri']);
+								$balanced = $balanced->unstore();
+								break;
+							case 'Balanced_Customer-addCard':
+								$balanced = Balanced\Customer::get($fields['customer_uri']);
+								$balanced = $balanced->addCard($fields['card_uri']);
+								break;
+							case 'Balanced_Customer-addBankAccount':
+								$balanced = Balanced\Customer::get($fields['customer_uri']);
+								$balanced = $balanced->addBankAccount($fields['bank_account_uri']);
+								break;
+							case 'Balanced_Customer-bankAccount-verification-create':
+								$balanced = Balanced\Customer::get($fields['customer_uri']);
+								$balanced = Balanced\BankAccount::get($balanced['bank_accounts_uri']);
+								$balanced = $balanced->verify();
+								break;
+							case 'Balanced_BankAccount-verification-create':
+								$balanced = Balanced\BankAccount::get($fields['bank_account_uri']);
+								$balanced = $balanced->verify();
+								break;
+							case 'Balanced_BankAccountVerification-update':
+								$balanced = Balanced\BankAccountVerification::get($fields['verification_uri']);
+								$balanced.amount_1 = $fields['amount_1'];
+								$balanced.amount_2 = $fields['amount_2'];
+								$balanced = $balanced->save();
+								break;
+							case 'Balanced_Debit-create':
+								$balanced = Balanced\Customer::get($fields['customer_uri']);
+								$balanced = $balanced->debit($fields);
+								break;
+							case 'Balanced_Debit-refund':
+								$balanced = Balanced\Debit::get($fields['debit_uri']);
+								$balanced = $balanced->refund();
+								break;
+							case 'Balanced_Credit-create':
+								$balanced = Balanced\Customer::get($fields['customer_uri']);
+								$balanced = $balanced->credit($fields);
+						}
+					} catch (Balanced\Errors\DuplicateAccountEmailAddress $e) {
+						$context['messages'][] = array('balanced', false, $e->getMessage());
+						Balanced_General::emailPrimaryDeveloper($e->getMessage());
+						return $context;
+					} catch (Balanced\Errors\InvalidAmount $e) {
+						$context['messages'][] = array('balanced', false, $e->getMessage());
+						Balanced_General::emailPrimaryDeveloper($e->getMessage());
+						return $context;
+					} catch (Balanced\Errors\InvalidRoutingNumber $e) {
+						$context['messages'][] = array('balanced', false, $e->getMessage());
+						Balanced_General::emailPrimaryDeveloper($e->getMessage());
+						return $context;
+					} catch (Balanced\Errors\InvalidBankAccountNumber $e) {
+						$context['messages'][] = array('balanced', false, $e->getMessage());
+						Balanced_General::emailPrimaryDeveloper($e->getMessage());
+						return $context;
+					} catch (Balanced\Errors\Declined $e) {
+						$context['messages'][] = array('balanced', false, $e->getMessage());
+						Balanced_General::emailPrimaryDeveloper($e->getMessage());
+						return $context;
+					} catch (Balanced\Errors\CannotAssociateMerchantWithAccount $e) {
+						$context['messages'][] = array('balanced', false, $e->getMessage());
+						Balanced_General::emailPrimaryDeveloper($e->getMessage());
+						return $context;
+					} catch (Balanced\Errors\AccountIsAlreadyAMerchant $e) {
+						$context['messages'][] = array('balanced', false, $e->getMessage());
+						Balanced_General::emailPrimaryDeveloper($e->getMessage());
+						return $context;
+					} catch (Balanced\Errors\NoFundingSource $e) {
+						$context['messages'][] = array('balanced', false, $e->getMessage());
+						Balanced_General::emailPrimaryDeveloper($e->getMessage());
+						return $context;
+					} catch (Balanced\Errors\NoFundingDestination $e) {
+						$context['messages'][] = array('balanced', false, $e->getMessage());
+						Balanced_General::emailPrimaryDeveloper($e->getMessage());
+						return $context;
+					} catch (Balanced\Errors\CardAlreadyAssociated $e) {
+						$context['messages'][] = array('balanced', false, $e->getMessage());
+						Balanced_General::emailPrimaryDeveloper($e->getMessage());
+						return $context;
+					} catch (Balanced\Errors\CannotAssociateCard $e) {
+						$context['messages'][] = array('balanced', false, $e->getMessage());
+						Balanced_General::emailPrimaryDeveloper($e->getMessage());
+						return $context;
+					} catch (Balanced\Errors\BankAccountAlreadyAssociated $e) {
+						$context['messages'][] = array('balanced', false, $e->getMessage());
+						Balanced_General::emailPrimaryDeveloper($e->getMessage());
+						return $context;
+					} catch (Balanced\Errors\AddressVerificationFailed $e) {
+						$context['messages'][] = array('balanced', false, $e->getMessage());
+						Balanced_General::emailPrimaryDeveloper($e->getMessage());
+						return $context;
+					} catch (Balanced\Errors\MarketplaceAlreadyCreated $e) {
+						$context['messages'][] = array('balanced', false, $e->getMessage());
+						Balanced_General::emailPrimaryDeveloper($e->getMessage());
+						return $context;
+					} catch (Balanced\Errors\IdentityVerificationFailed $e) {
+						$context['messages'][] = array('balanced', false, $e->getMessage());
+						Balanced_General::emailPrimaryDeveloper($e->getMessage());
+						return $context;
+					} catch (Balanced\Errors\InsufficientFunds $e) {
+						$context['messages'][] = array('balanced', false, $e->getMessage());
+						Balanced_General::emailPrimaryDeveloper($e->getMessage());
+						return $context;
+					} catch (Balanced\Errors\CannotHold $e) {
+						$context['messages'][] = array('balanced', false, $e->getMessage());
+						Balanced_General::emailPrimaryDeveloper($e->getMessage());
+						return $context;
+					} catch (Balanced\Errors\CannotCredit $e) {
+						$context['messages'][] = array('balanced', false, $e->getMessage());
+						Balanced_General::emailPrimaryDeveloper($e->getMessage());
+						return $context;
+					} catch (Balanced\Errors\CannotDebit $e) {
+						$context['messages'][] = array('balanced', false, $e->getMessage());
+						Balanced_General::emailPrimaryDeveloper($e->getMessage());
+						return $context;
+					} catch (Balanced\Errors\CannotRefund $e) {
+						$context['messages'][] = array('balanced', false, $e->getMessage());
+						Balanced_General::emailPrimaryDeveloper($e->getMessage());
+						return $context;
+					} catch (Balanced\Errors\BankAccountVerificationFailure $e) {
+						$context['messages'][] = array('balanced', false, $e->getMessage());
+						Balanced_General::emailPrimaryDeveloper($e->getMessage());
+						return $context;
+					} catch (Exception $e) {
+						// Something else happened, completely unrelated to Balanced
+						$context['messages'][] = array('balanced', false, $e->getMessage());
+						Balanced_General::emailPrimaryDeveloper($e->getMessage());
+						return $context;
+					}
+				}
+			}
 
-            // Ensure updated stripe[...] fields replace empty fields
-            foreach($stripe as $key => $val) {
-                if(empty($val) && isset($_POST['stripe'][$key])) {
-                    $stripe[$key] = $_POST['stripe'][$key];
-                    // Todo consider updating stripe if user changes an optional field after tripe creation but prior to symphony event success
-                }
-            }
-        }
+		} else {
+			$balanced = unserialize($_SESSION['symphony-balanced']);
 
-        if (!empty($stripe)) {
-            // Convert stripe object to array so that it can be looped
-            if(is_object($stripe)) {
-                $stripe = $stripe->__toArray();
+			// Ensure updated balanced[...] fields replace empty fields
+			foreach($balanced as $key => $val) {
+				if(empty($val) && isset($_POST['balanced'][$key])) {
+					$balanced[$key] = $_POST['balanced'][$key];
+					// Todo consider updating balanced if user changes an optional field after tripe creation but prior to symphony event success
+				}
+			}
+		}
 
-                foreach($stripe as $key => $val){
-                    if(is_object($val)) {
-                        $stripe[$key] = $val->__toArray();
-                    }
-                }
-            }
+		if (!empty($balanced)) {
+			// Convert balanced object to array so that it can be looped
+			if(is_object($balanced)) {
+				$balanced = $balanced->__toArray();
 
-            // Add values of response for Symphony event to process
-            if(is_array($context['fields'])) {
-                $context['fields'] = array_merge(Stripe_General::addStripeFieldsToSymphonyEventFields($stripe), $context['fields']);
-            } else {
-                $context['fields'] = Stripe_General::addStripeFieldsToSymphonyEventFields($stripe);
-            }
-            // Create the post data cookie element
-            General::array_to_xml($context['post_values'], $stripe, true);
+				foreach($balanced as $key => $val){
+					if(is_object($val)) {
+						$balanced[$key] = $val->__toArray();
+					}
+				}
+			}
 
-            // Add stripe response to session in case event fails
-            $_SESSION['symphony-stripe'] = serialize($stripe);
-        }
+			// Add values of response for Symphony event to process
+			if(is_array($context['fields'])) {
+				$context['fields'] = array_merge(Balanced_General::addBalancedFieldsToSymphonyEventFields($balanced), $context['fields']);
+			} else {
+				$context['fields'] = Balanced_General::addBalancedFieldsToSymphonyEventFields($balanced);
+			}
+			// Create the post data cookie element
+			General::array_to_xml($context['post_values'], $balanced, true);
 
-        return $context;
-    }
+			// Add balanced response to session in case event fails
+			$_SESSION['symphony-balanced'] = serialize($balanced);
+		}
 
-    public function actionEventPostSaveFilter($context) {
-        // Clear session saved response
-        unset($_SESSION['symphony-stripe']);
-    }
+		return $context;
+	}
 
-    public function actionAddCustomPreferenceFieldsets($context) {
-        // If the Payment Gateway Interface extension is installed, don't
-        // double display the preference, unless this function is called from
-        // the `pgi-loader` context.
-        if (in_array('pgi_loader', Symphony::ExtensionManager()->listInstalledHandles()) xor isset($context['pgi-loader'])) return;
+	public function actionEventPostSaveFilter($context) {
+		// Clear session saved response
+		unset($_SESSION['symphony-balanced']);
+	}
 
-        $fieldset = new XMLElement('fieldset');
-        $fieldset->setAttribute('class', 'settings');
-        $fieldset->appendChild(new XMLElement('legend', __('Stripe')));
+	public function actionAddCustomPreferenceFieldsets($context) {
+		// If the Payment Gateway Interface extension is installed, don't
+		// double display the preference, unless this function is called from
+		// the `pgi-loader` context.
+		if (in_array('pgi_loader', Symphony::ExtensionManager()->listInstalledHandles()) xor isset($context['pgi-loader'])) return;
 
-        $div = new XMLElement('div', null);
-        $group = new XMLElement('div', null, array('class' => 'group'));
+		$fieldset = new XMLElement('fieldset');
+		$fieldset->setAttribute('class', 'settings');
+		$fieldset->appendChild(new XMLElement('legend', __('Balanced')));
 
-        // Build the Gateway Mode
-        $label = new XMLElement('label', __('Stripe Mode'));
-        $options = array(
-            array('test', Stripe_General::isTestMode(), __('Test')),
-            array('live', !Stripe_General::isTestMode(), __('Live'))
-        );
+		$div = new XMLElement('div', null);
+		$group = new XMLElement('div', null, array('class' => 'group'));
 
-        $label->appendChild(Widget::Select('settings[stripe][gateway-mode]', $options));
-        $div->appendChild($label);
-        $fieldset->appendChild($div);
+		// Build the Gateway Mode
+		$label = new XMLElement('label', __('Balanced Mode'));
+		$options = array(
+			array('test', Balanced_General::isTestMode(), __('Test')),
+			array('live', !Balanced_General::isTestMode(), __('Live'))
+		);
 
-        // Live Public API Key
-        $label = new XMLElement('label', __('Live Secret API Key'));
-        $label->appendChild(
-            Widget::Input('settings[stripe][live-api-key]', Symphony::Configuration()->get("live-api-key", 'stripe'))
-        );
-        $group->appendChild($label);
+		$label->appendChild(Widget::Select('settings[balanced][gateway-mode]', $options));
+		$div->appendChild($label);
+		$fieldset->appendChild($div);
 
-        // Test Public API Key
-        $label = new XMLElement('label', __('Test Secret API Key'));
-        $label->appendChild(
-            Widget::Input('settings[stripe][test-api-key]', Symphony::Configuration()->get("test-api-key", 'stripe'))
-        );
-        $group->appendChild($label);
+		// Live Public API Key
+		$label = new XMLElement('label', __('Live API key secret'));
+		$label->appendChild(
+			Widget::Input('settings[balanced][live-api-key]', Symphony::Configuration()->get("live-api-key", 'balanced'))
+		);
+		$group->appendChild($label);
 
-        $fieldset->appendChild($group);
-        $context['wrapper']->appendChild($fieldset);
-    }
+		// Test Public API Key
+		$label = new XMLElement('label', __('Test API key secret'));
+		$label->appendChild(
+			Widget::Input('settings[balanced][test-api-key]', Symphony::Configuration()->get("test-api-key", 'balanced'))
+		);
+		$group->appendChild($label);
 
-    public function actionSave($context) {
-        $settings = $context['settings'];
+		$fieldset->appendChild($group);
+		$context['wrapper']->appendChild($fieldset);
+	}
 
-        Symphony::Configuration()->set('test-api-key', $settings['stripe']['test-api-key'], 'stripe');
-        Symphony::Configuration()->set('live-api-key', $settings['stripe']['live-api-key'], 'stripe');
-        Symphony::Configuration()->set('gateway-mode', $settings['stripe']['gateway-mode'], 'stripe');
+	public function actionSave($context) {
+		$settings = $context['settings'];
 
-        return Symphony::Configuration()->write();
-    }
+		Symphony::Configuration()->set('test-api-key', $settings['balanced']['test-api-key'], 'balanced');
+		Symphony::Configuration()->set('live-api-key', $settings['balanced']['live-api-key'], 'balanced');
+		Symphony::Configuration()->set('gateway-mode', $settings['balanced']['gateway-mode'], 'balanced');
 
-    public function install() {
-        // Create stripe_customer_id field database:
-        Symphony::Database()->query("
-			CREATE TABLE IF NOT EXISTS `tbl_fields_stripe_customer_id` (
-             `id` INT(11) unsigned NOT NULL AUTO_INCREMENT,
-              `field_id` INT(11) unsigned NOT NULL,
-              `validator` VARCHAR(255) COLLATE utf8_unicode_ci DEFAULT NULL,
-              `disabled` enum('yes','no') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'yes',
-              PRIMARY KEY (`id`),
-              KEY `field_id` (`field_id`)
-            ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+		return Symphony::Configuration()->write();
+	}
+
+	public function install() {
+		// Create balanced_customer_id field database:
+		Symphony::Database()->query("
+			CREATE TABLE IF NOT EXISTS `tbl_fields_balanced_customer_id` (
+			 `id` INT(11) unsigned NOT NULL AUTO_INCREMENT,
+			  `field_id` INT(11) unsigned NOT NULL,
+			  `validator` VARCHAR(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+			  `disabled` enum('yes','no') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'yes',
+			  PRIMARY KEY (`id`),
+			  KEY `field_id` (`field_id`)
+			) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 		");
 
-        // Create stripe_customer_link field database:
-        Symphony::Database()->query("
-			CREATE TABLE IF NOT EXISTS `tbl_fields_stripe_customer_link` (
-              `id` INT(11) unsigned NOT NULL AUTO_INCREMENT,
-              `field_id` INT(11) unsigned NOT NULL,
-         	  `related_field_id` VARCHAR(255) NOT NULL,
-              `show_association` enum('yes','no') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'yes',
-              `disabled` enum('yes','no') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'yes',
-              PRIMARY KEY (`id`),
-              KEY `field_id` (`field_id`)
-            ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+		// Create balanced_customer_link field database:
+		Symphony::Database()->query("
+			CREATE TABLE IF NOT EXISTS `tbl_fields_balanced_customer_link` (
+			  `id` INT(11) unsigned NOT NULL AUTO_INCREMENT,
+			  `field_id` INT(11) unsigned NOT NULL,
+			  `related_field_id` VARCHAR(255) NOT NULL,
+			  `show_association` enum('yes','no') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'yes',
+			  `disabled` enum('yes','no') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'yes',
+			  PRIMARY KEY (`id`),
+			  KEY `field_id` (`field_id`)
+			) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 		");
-    }
+	}
 
-    public function uninstall() {
-        // Drop field tables:
-        Symphony::Database()->query("DROP TABLE `tbl_fields_stripe_customer_id`");
-        Symphony::Database()->query("DROP TABLE `tbl_fields_stripe_customer_link`");
+	public function uninstall() {
+		// Drop field tables:
+		Symphony::Database()->query("DROP TABLE `tbl_fields_balanced_customer_id`");
+		Symphony::Database()->query("DROP TABLE `tbl_fields_balanced_customer_link`");
 
-        // Clean configuration
-        Symphony::Configuration()->remove('test-api-key', 'stripe');
-        Symphony::Configuration()->remove('live-api-key', 'stripe');
-        Symphony::Configuration()->remove('gateway-mode', 'stripe');
+		// Clean configuration
+		Symphony::Configuration()->remove('test-api-key', 'balanced');
+		Symphony::Configuration()->remove('live-api-key', 'balanced');
+		Symphony::Configuration()->remove('gateway-mode', 'balanced');
 
-        return Symphony::Configuration()->write();
-    }*/
+		return Symphony::Configuration()->write();
+	}
 
 //    public function fetchNavigation() {
 //        return array(
 //            array(
 //                'location' => 1000,
-//                'name' => __('Stripe'),
+//                'name' => __('Balanced'),
 //                'children' => array(
 //                    array(
 //                        'name' => __('Plans'),
