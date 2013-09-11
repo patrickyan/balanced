@@ -167,93 +167,95 @@ class Extension_Balanced extends Extension {
 								$balanced = $balanced->credit($fields);
 						}
 					} catch (Balanced\Errors\DuplicateAccountEmailAddress $e) {
-						$context['messages'][] = array('balanced', false, $e->getMessage());
-						Balanced_General::emailPrimaryDeveloper($e->getMessage());
+						$context['messages'][] = array('balanced', false, $e->response->body->description);
+						Balanced_General::emailPrimaryDeveloper($e->response->raw_body);
 						return $context;
 					} catch (Balanced\Errors\InvalidAmount $e) {
-						$context['messages'][] = array('balanced', false, $e->getMessage());
-						Balanced_General::emailPrimaryDeveloper($e->getMessage());
+						$context['messages'][] = array('balanced', false, $e->response->body->description);
+						Balanced_General::emailPrimaryDeveloper($e->response->raw_body);
 						return $context;
 					} catch (Balanced\Errors\InvalidRoutingNumber $e) {
-						$context['messages'][] = array('balanced', false, $e->getMessage());
-						Balanced_General::emailPrimaryDeveloper($e->getMessage());
+						$context['messages'][] = array('balanced', false, $e->response->body->description);
+						Balanced_General::emailPrimaryDeveloper($e->response->raw_body);
 						return $context;
 					} catch (Balanced\Errors\InvalidBankAccountNumber $e) {
-						$context['messages'][] = array('balanced', false, $e->getMessage());
-						Balanced_General::emailPrimaryDeveloper($e->getMessage());
+						$context['messages'][] = array('balanced', false, $e->response->body->description);
+						Balanced_General::emailPrimaryDeveloper($e->response->raw_body);
 						return $context;
 					} catch (Balanced\Errors\Declined $e) {
-						$context['messages'][] = array('balanced', false, $e->getMessage());
-						Balanced_General::emailPrimaryDeveloper($e->getMessage());
+						$context['messages'][] = array('balanced', false, $e->response->body->description);
+						Balanced_General::emailPrimaryDeveloper($e->response->raw_body);
 						return $context;
 					} catch (Balanced\Errors\CannotAssociateMerchantWithAccount $e) {
-						$context['messages'][] = array('balanced', false, $e->getMessage());
-						Balanced_General::emailPrimaryDeveloper($e->getMessage());
+						$context['messages'][] = array('balanced', false, $e->response->body->description);
+						Balanced_General::emailPrimaryDeveloper($e->response->raw_body);
 						return $context;
 					} catch (Balanced\Errors\AccountIsAlreadyAMerchant $e) {
-						$context['messages'][] = array('balanced', false, $e->getMessage());
-						Balanced_General::emailPrimaryDeveloper($e->getMessage());
+						$context['messages'][] = array('balanced', false, $e->response->body->description);
+						Balanced_General::emailPrimaryDeveloper($e->response->raw_body);
 						return $context;
 					} catch (Balanced\Errors\NoFundingSource $e) {
-						$context['messages'][] = array('balanced', false, $e->getMessage());
-						Balanced_General::emailPrimaryDeveloper($e->getMessage());
+						$context['messages'][] = array('balanced', false, $e->response->body->description);
+						Balanced_General::emailPrimaryDeveloper($e->response->raw_body);
 						return $context;
 					} catch (Balanced\Errors\NoFundingDestination $e) {
-						$context['messages'][] = array('balanced', false, $e->getMessage());
-						Balanced_General::emailPrimaryDeveloper($e->getMessage());
+						$context['messages'][] = array('balanced', false, $e->response->body->description);
+						Balanced_General::emailPrimaryDeveloper($e->response->raw_body);
 						return $context;
 					} catch (Balanced\Errors\CardAlreadyAssociated $e) {
-						$context['messages'][] = array('balanced', false, $e->getMessage());
-						Balanced_General::emailPrimaryDeveloper($e->getMessage());
+						$context['messages'][] = array('balanced', false, $e->response->body->description);
+						Balanced_General::emailPrimaryDeveloper($e->response->raw_body);
 						return $context;
 					} catch (Balanced\Errors\CannotAssociateCard $e) {
-						$context['messages'][] = array('balanced', false, $e->getMessage());
-						Balanced_General::emailPrimaryDeveloper($e->getMessage());
+						$context['messages'][] = array('balanced', false, $e->response->body->description);
+						Balanced_General::emailPrimaryDeveloper($e->response->raw_body);
 						return $context;
 					} catch (Balanced\Errors\BankAccountAlreadyAssociated $e) {
-						$context['messages'][] = array('balanced', false, $e->getMessage());
-						Balanced_General::emailPrimaryDeveloper($e->getMessage());
+						$context['messages'][] = array('balanced', false, $e->response->body->description);
+						Balanced_General::emailPrimaryDeveloper($e->response->raw_body);
 						return $context;
 					} catch (Balanced\Errors\AddressVerificationFailed $e) {
-						$context['messages'][] = array('balanced', false, $e->getMessage());
-						Balanced_General::emailPrimaryDeveloper($e->getMessage());
+						$context['messages'][] = array('balanced', false, $e->response->body->description);
+						Balanced_General::emailPrimaryDeveloper($e->response->raw_body);
 						return $context;
 					} catch (Balanced\Errors\MarketplaceAlreadyCreated $e) {
-						$context['messages'][] = array('balanced', false, $e->getMessage());
-						Balanced_General::emailPrimaryDeveloper($e->getMessage());
+						$context['messages'][] = array('balanced', false, $e->response->body->description);
+						Balanced_General::emailPrimaryDeveloper($e->response->raw_body);
 						return $context;
 					} catch (Balanced\Errors\IdentityVerificationFailed $e) {
-						$context['messages'][] = array('balanced', false, $e->getMessage());
-						Balanced_General::emailPrimaryDeveloper($e->getMessage());
+						$context['messages'][] = array('balanced', false, $e->response->body->description);
+						Balanced_General::emailPrimaryDeveloper($e->response->raw_body);
 						return $context;
 					} catch (Balanced\Errors\InsufficientFunds $e) {
-						$context['messages'][] = array('balanced', false, $e->getMessage());
-						Balanced_General::emailPrimaryDeveloper($e->getMessage());
+						$context['messages'][] = array('balanced', false, $e->response->body->description);
+						Balanced_General::emailPrimaryDeveloper($e->response->raw_body);
 						return $context;
 					} catch (Balanced\Errors\CannotHold $e) {
-						$context['messages'][] = array('balanced', false, $e->getMessage());
-						Balanced_General::emailPrimaryDeveloper($e->getMessage());
+						$context['messages'][] = array('balanced', false, $e->response->body->description);
+						Balanced_General::emailPrimaryDeveloper($e->response->raw_body);
 						return $context;
 					} catch (Balanced\Errors\CannotCredit $e) {
-						$context['messages'][] = array('balanced', false, $e->getMessage());
-						Balanced_General::emailPrimaryDeveloper($e->getMessage());
+						$context['messages'][] = array('balanced', false, $e->response->body->description);
+						Balanced_General::emailPrimaryDeveloper($e->response->raw_body);
 						return $context;
 					} catch (Balanced\Errors\CannotDebit $e) {
-						$context['messages'][] = array('balanced', false, $e->getMessage());
-						Balanced_General::emailPrimaryDeveloper($e->getMessage());
+						$context['messages'][] = array('balanced', false, $e->response->body->description);
+						Balanced_General::emailPrimaryDeveloper($e->response->raw_body);
 						return $context;
 					} catch (Balanced\Errors\CannotRefund $e) {
-						$context['messages'][] = array('balanced', false, $e->getMessage());
-						Balanced_General::emailPrimaryDeveloper($e->getMessage());
+						$context['messages'][] = array('balanced', false, $e->response->body->description);
+						Balanced_General::emailPrimaryDeveloper($e->response->raw_body);
 						return $context;
 					} catch (Balanced\Errors\BankAccountVerificationFailure $e) {
-						$context['messages'][] = array('balanced', false, $e->getMessage());
-						Balanced_General::emailPrimaryDeveloper($e->getMessage());
+						$context['messages'][] = array('balanced', false, $e->response->body->description);
+						Balanced_General::emailPrimaryDeveloper($e->response->raw_body);
 						return $context;
 					} catch (Exception $e) {
-						// Something else happened, completely unrelated to Balanced
-						$context['messages'][] = array('balanced', false, $e->getMessage());
-						Balanced_General::emailPrimaryDeveloper($e->getMessage());
+						//print_r(json_encode($e->response)); die();
+						//print_r(Balanced_General::convertObjectToArray($e->response)); die();
+
+						$context['messages'][] = array('balanced', false, $e->response->body->description);
+						Balanced_General::emailPrimaryDeveloper($e->response->raw_body);
 						return $context;
 					}
 				}
