@@ -150,8 +150,8 @@ class Extension_Balanced extends Extension {
 								break;
 							case 'Balanced_BankAccountVerification-update':
 								$balanced = Balanced\BankAccountVerification::get($fields['verification_uri']);
-								$balanced.amount_1 = $fields['amount_1'];
-								$balanced.amount_2 = $fields['amount_2'];
+								$balanced['amount_1'] = $fields['amount_1'];
+								$balanced['amount_2'] = $fields['amount_2'];
 								$balanced = $balanced->save();
 								break;
 							case 'Balanced_Debit-create':
