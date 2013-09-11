@@ -11,6 +11,7 @@ Class FieldBalanced_Customer_URI extends FieldInput {
 		$this->_required = true;
 
 		$this->set('required', 'yes');
+		$this->set('show_column', 'yes');
 	}
 
 	/*-------------------------------------------------------------------------
@@ -47,19 +48,44 @@ Class FieldBalanced_Customer_URI extends FieldInput {
 		return $entry['value'];
 	}
 
+	public function findDefaults(array &$settings) {
+		$settings['disabled'] = yes;
+	}
+
 	public function displaySettingsPanel(XMLElement &$wrapper, $errors = null) {
 		// CHECK OK TO CALL PARENT OF PARENT?
 		Field::displaySettingsPanel($wrapper, $errors);
 
-		$div = new XMLElement('div', NULL, array('class' => 'three columns'));
-		$this->appendShowAssociationCheckbox($div);
+		$order = $this->get('sortorder');
+
+		/*---------------------------------------------------------------------
+			Core options
+		---------------------------------------------------------------------*/
+
+		$div = new XMLElement('div', NULL, array('class' => 'two columns'));
 		$this->appendRequiredCheckbox($div);
+		$this->appendShowColumnCheckbox($div);
+
+		$wrapper->appendChild($div);
+
+		$div = new XMLElement('div', NULL, array('class' => 'two columns'));
+		$this->appendShowAssociationCheckbox($div);
 
 		$label = Widget::Label();
 		$label->setAttribute('class', 'column');
-		$input = Widget::Input("fields[".$this->get('sortorder')."][disabled]", 'yes', 'checkbox');
+		$input = Widget::Input(
+			"fields[{$order}][disabled]",
+			'no', 'hidden'
+		);
+		$div->appendChild($input);
+		$input = Widget::Input(
+			"fields[{$order}][disabled]",
+			'yes', 'checkbox'
+		);
 
-		if ($this->get('disabled') == 'yes') $input->setAttribute('checked', 'checked');
+		if ($this->get('disabled') == 'yes') {
+			$input->setAttribute('checked', 'checked');
+		}
 		$label->setValue($input->generate() .' '. __('Disable editing of this field on publish page'));
 
 		$div->appendChild($label);
