@@ -41,10 +41,25 @@ Arguments must be passed in the array `balanced[]`. For example:
 
 This filter will pass `/v1/customers/CU7GuPv9Y2F8ySwJHuHL0YWq` as an `customer_uri` argument. If the Balanced API call is successful, the filter will capture any response from Balanced and add it to the event's fields array prior to saving into the Symphony section.
 
+Credit Card Form
+--------
+
+If you are using `balanced.js` and Balanced's example script to tokenize your cards, make sure you change
+
+	<input name="action[YOUR-EVENT]" type="submit" value="Submit"/>
+
+to
+
+	<input name="action[YOUR-EVENT]" type="hidden"/>
+	<input type="submit" value="Submit"/>
+
+as using jQuery's `submit()` method will **not** add the `action[]` field if it is on the submit button.
+
+
 FAQ
 --------
 
 ### Why do I get the error "Argument 2 passed to SectionEvent::processPreSaveFilters() must be of the type array"?
 
-Your page must include at least one input for a Symphony field, i.e. you cannot create a form with only `balanced[]` fields. If you do not want to create any field for your section, simply add `<input name="fields[]" type="hidden"/>` to your form.
+Your page must include at least one input for a Symphony field, i.e. you cannot create a form with only `balanced[]` fields. If you do not want to pass any non-Balanced fields for your section, simply add `<input name="fields[]" type="hidden"/>` to your form.
 

@@ -141,7 +141,7 @@ class Extension_Balanced extends Extension {
 								break;
 							case 'Balanced_Customer-bankAccount-verification-create':
 								$balanced = Balanced\Customer::get($fields['customer_uri']);
-								$balanced = Balanced\BankAccount::get($balanced['bank_accounts_uri']);
+								$balanced = Balanced\BankAccount::get($balanced['bank_account_uri']);
 								$balanced = $balanced->verify();
 								break;
 							case 'Balanced_BankAccount-verification-create':
@@ -251,7 +251,8 @@ class Extension_Balanced extends Extension {
 						Balanced_General::emailPrimaryDeveloper($e->response->raw_body);
 						return $context;
 					} catch (Exception $e) {
-						//print_r(json_encode($e->response)); die();
+						//print_r($e->getMessage()); die();
+						print_r($e); die();
 						//print_r(Balanced_General::convertObjectToArray($e->response)); die();
 
 						$context['messages'][] = array('balanced', false, $e->response->body->description);
