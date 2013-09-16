@@ -108,63 +108,73 @@ class Extension_Balanced extends Extension {
 					try {
 						switch($val) {
 							case 'Balanced_Customer-create':
-								$balanced = new Balanced\Customer($fields);
-								$balanced = $balanced->save();
+								$balancedCustomer = new Balanced\Customer($fields);
+								$balanced = $balancedCustomer->save();
 								break;
 							case 'Balanced_Customer-create-addCard':
-								$balanced = new Balanced\Customer($fields);
-								$balanced->addCard($fields['card_uri']);
-								$balanced = $balanced->save();
+								$balancedCustomer = new Balanced\Customer($fields);
+								$balancedCustomer->addCard($fields['card_uri']);
+								$balanced = $balancedCustomer->save();
 								break;
 							case 'Balanced_Customer-create-addBankAccount':
-								$balanced = new Balanced\Customer($fields);
-								$balanced->addBankAccount($fields['bank_account_uri']);
-								$balanced = $balanced->save();
+								$balancedCustomer = new Balanced\Customer($fields);
+								$balancedCustomer->addBankAccount($fields['bank_account_uri']);
+								$balanced = $balancedCustomer->save();
 								break;
 							case 'Balanced_Customer-update':
-								$balanced = Balanced\Customer::get($fields['customer_uri']);
+								$balancedCustomer = Balanced\Customer::get($fields['customer_uri']);
 								unset($fields['id']);
-								$balanced = Balanced_General::setBalancedFieldsToUpdate($balanced, $fields);
-								$balanced = $balanced->save();
+								$balancedCustomer = Balanced_General::setBalancedFieldsToUpdate($balanced, $fields);
+								$balanced = $balancedCustomer->save();
 								break;
 							case 'Balanced_Customer-delete':
-								$balanced = Balanced\Customer::get($fields['customer_uri']);
-								$balanced = $balanced->unstore();
+								$balancedCustomer = Balanced\Customer::get($fields['customer_uri']);
+								$balanced = $balancedCustomer->unstore();
 								break;
 							case 'Balanced_Customer-addCard':
-								$balanced = Balanced\Customer::get($fields['customer_uri']);
-								$balanced = $balanced->addCard($fields['card_uri']);
+								$balancedCustomer = Balanced\Customer::get($fields['customer_uri']);
+								$balanced = $balancedCustomer->addCard($fields['card_uri']);
 								break;
 							case 'Balanced_Customer-addBankAccount':
-								$balanced = Balanced\Customer::get($fields['customer_uri']);
-								$balanced = $balanced->addBankAccount($fields['bank_account_uri']);
+								$balancedCustomer = Balanced\Customer::get($fields['customer_uri']);
+								$balanced = $balancedCustomer->addBankAccount($fields['bank_account_uri']);
+								$balancedClearBankAccountVerification = true;
 								break;
-							case 'Balanced_Customer-bankAccount-verification-create':
+							/*case 'Balanced_Customer-bankAccount-verification-create':
 								$balanced = Balanced\Customer::get($fields['customer_uri']);
 								$balanced = Balanced\BankAccount::get($balanced['bank_account_uri']);
 								$balanced = $balanced->verify();
-								break;
+								break;*/
 							case 'Balanced_BankAccount-verification-create':
-								$balanced = Balanced\BankAccount::get($fields['bank_account_uri']);
-								$balanced = $balanced->verify();
+								$balancedBankAccount = Balanced\BankAccount::get($fields['bank_account_uri']);
+								$balanced = $balancedBankAccount->verify();
+								$prefix = 'bank_account_verification_';
 								break;
 							case 'Balanced_BankAccountVerification-update':
-								$balanced = Balanced\BankAccountVerification::get($fields['verification_uri']);
-								$balanced['amount_1'] = $fields['amount_1'];
-								$balanced['amount_2'] = $fields['amount_2'];
-								$balanced = $balanced->save();
+								$balancedBankAccountVerification = Balanced\BankAccountVerification::get($fields['bank_account_verification_uri']);
+								$balancedBankAccountVerification->amount_1 = Balanced_General::dollarsToCents( $fields['amount_1'] );
+								$balancedBankAccountVerification->amount_2 = Balanced_General::dollarsToCents( $fields['amount_2'] );
+								$balanced = $balancedBankAccountVerification->save();
+								$prefix = 'bank_account_verification_';
 								break;
 							case 'Balanced_Debit-create':
-								$balanced = Balanced\Customer::get($fields['customer_uri']);
-								$balanced = $balanced->debit($fields);
+								$balancedCustomer = Balanced\Customer::get($fields['customer_uri']);
+								$balanced = $balancedCustomer->debit(
+									$amount = Balanced_General::dollarsToCents($fields['amount']),
+									$appears_on_statement_as = $fields['appears_on_statement_as'],
+									$meta = $fields['meta'],
+									$description = $fields['description'],
+									$source = $fields['source_uri'],
+									$on_behalf_of = $fields['on_behalf_of_uri']
+								);
 								break;
 							case 'Balanced_Debit-refund':
-								$balanced = Balanced\Debit::get($fields['debit_uri']);
-								$balanced = $balanced->refund();
+								$balancedCustomer = Balanced\Debit::get($fields['debit_uri']);
+								$balanced = $balancedCustomer->refund();
 								break;
 							case 'Balanced_Credit-create':
-								$balanced = Balanced\Customer::get($fields['customer_uri']);
-								$balanced = $balanced->credit($fields);
+								$balancedCustomer = Balanced\Customer::get($fields['customer_uri']);
+								$balanced = $balancedCustomer->credit($fields);
 						}
 					} catch (Balanced\Errors\DuplicateAccountEmailAddress $e) {
 						$context['messages'][] = array('balanced', false, $e->response->body->description);
@@ -251,12 +261,25 @@ class Extension_Balanced extends Extension {
 						Balanced_General::emailPrimaryDeveloper($e->response->raw_body);
 						return $context;
 					} catch (Exception $e) {
-						//print_r($e->getMessage()); die();
-						print_r($e); die();
 						//print_r(Balanced_General::convertObjectToArray($e->response)); die();
+						//print_r($e); die();
 
-						$context['messages'][] = array('balanced', false, $e->response->body->description);
-						Balanced_General::emailPrimaryDeveloper($e->response->raw_body);
+						$errorMessage = $e->getMessage();
+						if(isset($e->response)) {
+							$errorMessage = $e->response->body->description;
+							$errorType = 'balanced';
+						}
+
+						$context['messages'][] = array('balanced', false, $errorMessage);
+
+						$errorMessage = $errorMessage . "\n\n" . json_encode($filters);
+
+						if (!isset($errorType)) {
+							Balanced_General::emailPrimaryDeveloper($errorMessage);
+						}
+						else {
+							Balanced_General::emailPrimaryDeveloper($e->response->raw_body);
+						}
 						return $context;
 					}
 				}
@@ -269,7 +292,6 @@ class Extension_Balanced extends Extension {
 			foreach($balanced as $key => $val) {
 				if(empty($val) && isset($_POST['balanced'][$key])) {
 					$balanced[$key] = $_POST['balanced'][$key];
-					// Todo consider updating balanced if user changes an optional field after tripe creation but prior to symphony event success
 				}
 			}
 		}
@@ -286,12 +308,32 @@ class Extension_Balanced extends Extension {
 				}
 			}
 
+			if (isset($prefix)) {
+				foreach ($balanced as $key => $value) {
+					$balanced[$prefix . $key] = $value;
+					unset($balanced[$key]);
+				}
+			}
+
 			// Add values of response for Symphony event to process
 			if(is_array($context['fields'])) {
 				$context['fields'] = array_merge(Balanced_General::addBalancedFieldsToSymphonyEventFields($balanced), $context['fields']);
 			} else {
 				$context['fields'] = Balanced_General::addBalancedFieldsToSymphonyEventFields($balanced);
 			}
+
+			// Reset the Bank Account Verification fields
+			if (isset($balancedClearBankAccountVerification) && ($balancedClearBankAccountVerification === true)) {
+				$context['fields']['bank-account-verification-type'] = '';
+				$context['fields']['bank-account-verification-created-at'] = '';
+				$context['fields']['bank-account-verification-uri'] = '';
+				$context['fields']['bank-account-verification-updated-at'] = '';
+				$context['fields']['bank-account-verification-state'] = '';
+				$context['fields']['bank-account-verification-id'] = '';
+				$context['fields']['bank-account-verification-attempts'] = '';
+				$context['fields']['bank-account-verification-remaining-attempts'] = '';
+			}
+
 			// Create the post data cookie element
 			General::array_to_xml($context['post_values'], $balanced, true);
 
@@ -366,6 +408,15 @@ class Extension_Balanced extends Extension {
 
 		$fieldset->appendChild($group);
 
+		// Appears On Statement As
+		$div = new XMLElement('div', null);
+		$label = new XMLElement('label', __('Appears On Statement As (18 characters max)'));
+		$label->appendChild(
+			Widget::Input('settings[balanced][appears-on-statement-as]', Symphony::Configuration()->get("appears-on-statement-as", 'balanced'))
+		);
+		$div->appendChild($label);
+		$fieldset->appendChild($div);
+
 		$context['wrapper']->appendChild($fieldset);
 	}
 
@@ -377,6 +428,7 @@ class Extension_Balanced extends Extension {
 		Symphony::Configuration()->set('test-api-key', $settings['balanced']['test-api-key'], 'balanced');
 		Symphony::Configuration()->set('live-marketplace-uri', $settings['balanced']['live-marketplace-uri'], 'balanced');
 		Symphony::Configuration()->set('test-marketplace-uri', $settings['balanced']['test-marketplace-uri'], 'balanced');
+		Symphony::Configuration()->set('appears-on-statement-as', $settings['balanced']['appears-on-statement-as'], 'balanced');
 
 		return Symphony::Configuration()->write();
 	}
@@ -419,6 +471,7 @@ class Extension_Balanced extends Extension {
 		Symphony::Configuration()->remove('test-api-key', 'balanced');
 		Symphony::Configuration()->remove('live-marketplace-uri', 'balanced');
 		Symphony::Configuration()->remove('test-marketplace-uri', 'balanced');
+		Symphony::Configuration()->remove('appears-on-statement-as', 'balanced');
 
 		return Symphony::Configuration()->write();
 	}
