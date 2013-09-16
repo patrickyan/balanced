@@ -318,7 +318,6 @@ class Extension_Balanced extends Extension {
 		$fieldset->appendChild(new XMLElement('legend', __('Balanced')));
 
 		$div = new XMLElement('div', null);
-		$group = new XMLElement('div', null, array('class' => 'group'));
 
 		// Build the Gateway Mode
 		$label = new XMLElement('label', __('Balanced Mode'));
@@ -330,6 +329,8 @@ class Extension_Balanced extends Extension {
 		$label->appendChild(Widget::Select('settings[balanced][gateway-mode]', $options));
 		$div->appendChild($label);
 		$fieldset->appendChild($div);
+
+		$group = new XMLElement('div', null, array('class' => 'group'));
 
 		// Live Public API Key
 		$label = new XMLElement('label', __('Live API key secret'));
@@ -346,15 +347,36 @@ class Extension_Balanced extends Extension {
 		$group->appendChild($label);
 
 		$fieldset->appendChild($group);
+
+		$group = new XMLElement('div', null, array('class' => 'group'));
+
+		// Live Marketplace URI
+		$label = new XMLElement('label', __('Live Marketplace URI'));
+		$label->appendChild(
+			Widget::Input('settings[balanced][live-marketplace-uri]', Symphony::Configuration()->get("live-marketplace-uri", 'balanced'))
+		);
+		$group->appendChild($label);
+
+		// Test Marketplace URI
+		$label = new XMLElement('label', __('Test Marketplace URI'));
+		$label->appendChild(
+			Widget::Input('settings[balanced][test-marketplace-uri]', Symphony::Configuration()->get("test-marketplace-uri", 'balanced'))
+		);
+		$group->appendChild($label);
+
+		$fieldset->appendChild($group);
+
 		$context['wrapper']->appendChild($fieldset);
 	}
 
 	public function actionSave($context) {
 		$settings = $context['settings'];
 
-		Symphony::Configuration()->set('test-api-key', $settings['balanced']['test-api-key'], 'balanced');
-		Symphony::Configuration()->set('live-api-key', $settings['balanced']['live-api-key'], 'balanced');
 		Symphony::Configuration()->set('gateway-mode', $settings['balanced']['gateway-mode'], 'balanced');
+		Symphony::Configuration()->set('live-api-key', $settings['balanced']['live-api-key'], 'balanced');
+		Symphony::Configuration()->set('test-api-key', $settings['balanced']['test-api-key'], 'balanced');
+		Symphony::Configuration()->set('live-marketplace-uri', $settings['balanced']['live-marketplace-uri'], 'balanced');
+		Symphony::Configuration()->set('test-marketplace-uri', $settings['balanced']['test-marketplace-uri'], 'balanced');
 
 		return Symphony::Configuration()->write();
 	}
@@ -392,9 +414,11 @@ class Extension_Balanced extends Extension {
 		Symphony::Database()->query("DROP TABLE `tbl_fields_balanced_customer_link`");
 
 		// Clean configuration
-		Symphony::Configuration()->remove('test-api-key', 'balanced');
-		Symphony::Configuration()->remove('live-api-key', 'balanced');
 		Symphony::Configuration()->remove('gateway-mode', 'balanced');
+		Symphony::Configuration()->remove('live-api-key', 'balanced');
+		Symphony::Configuration()->remove('test-api-key', 'balanced');
+		Symphony::Configuration()->remove('live-marketplace-uri', 'balanced');
+		Symphony::Configuration()->remove('test-marketplace-uri', 'balanced');
 
 		return Symphony::Configuration()->write();
 	}
