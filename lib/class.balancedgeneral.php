@@ -61,11 +61,11 @@ Abstract Class Balanced_General {
 	}
 
 	public static function dollarsToCents($dollars) {
-		return $dollars * 100;
+		return floor( $dollars * 100 );
 	}
 
 	public static function centsToDollars($cents) {
-		return $cents / 100;
+		return floor( $cents ) / 100;
 	}
 
 	public static function contentUrl() {

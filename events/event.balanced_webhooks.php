@@ -35,6 +35,8 @@
 
 			$body = @file_get_contents('php://input');
 			$event = json_decode($body, true);
+			// Respond with 201 Created
+			http_response_code(201);
 
 			$type = explode('.', $event['type']);
 
@@ -42,26 +44,36 @@
 
 			switch($type[0]) {
 				case 'debit':
-					$_POST['fields'] = Balanced_General::addBalancedFieldsToSymphonyEventFields($event['data']['object']);
+					$_POST['fields'] = $this->__addFields($event, $type);
 					$_POST['action'][$sEvent['debit']] = 1;
 					break;
 				case 'credit':
-					$_POST['fields'] = Balanced_General::addBalancedFieldsToSymphonyEventFields($event['data']['object']);
+					$_POST['fields'] = $this->__addFields($event, $type);
 					$_POST['action'][$sEvent['credit']] = 1;
 					break;
 				case 'hold':
-					$_POST['fields'] = Balanced_General::addBalancedFieldsToSymphonyEventFields($event['data']['object']);
+					$_POST['fields'] = $this->__addFields($event, $type);
 					$_POST['action'][$sEvent['hold']] = 1;
 					break;
 				case 'refund':
-					$_POST['fields'] = Balanced_General::addBalancedFieldsToSymphonyEventFields($event['data']['object']);
+					$_POST['fields'] = $this->__addFields($event, $type);
 					$_POST['action'][$sEvent['refund']] = 1;
 					break;
 			}
 
 		}
 
-		private  function __getRoute(){
+		private function __addFields($event, $type) {
+			$response = Balanced_General::addBalancedFieldsToSymphonyEventFields($event['entity']);
+			$response['event-uri'] = $event['uri'];
+			$response['resource'] = $type[0];
+			$response['event-type'] = $type[1];
+			unset($response['id']);
+
+			return $response;
+		}
+
+		private function __getRoute() {
 			$page = Frontend::Page()->resolvePage();
 			$events = explode(',', $page['events']);
 
@@ -73,7 +85,7 @@
 					$class = 'event' . $event;
 					$ext = new $class();
 
-					// Fid Balanced event filter
+					// Find Balanced event filter
 					foreach ($ext->eParamFILTERS as $filter) {
 						if(strstr($filter, 'balanced_'))
 							$name = str_replace('balanced_', '', $filter);
