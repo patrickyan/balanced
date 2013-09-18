@@ -65,9 +65,13 @@
 
 		private function __addFields($event, $type) {
 			$response = Balanced_General::addBalancedFieldsToSymphonyEventFields($event['entity']);
+			// Rename ambiguious URIs
+			$response['entity-uri'] = $event['entity']['uri'];
+			unset($response['uri']);
 			$response['event-uri'] = $event['uri'];
 			$response['resource'] = $type[0];
 			$response['event-type'] = $type[1];
+			// Remove Balanced's id because they do not recommend storing it + it conflicts with Symphony's id
 			unset($response['id']);
 
 			return $response;
