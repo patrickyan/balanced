@@ -27,6 +27,17 @@ Abstract Class Balanced_General {
 			return Symphony::Configuration()->get('live-api-key', 'balanced');
 	}
 
+	/**
+	 * Get Marketplace URI based on current mode
+	 * @return string
+	 */
+	public static function getMarketplaceUri() {
+		if(self::isTestMode())
+			return Symphony::Configuration()->get('test-marketplace-uri', 'balanced');
+		else
+			return Symphony::Configuration()->get('live-marketplace-uri', 'balanced');
+	}
+
 	public static function getAllFilters() {
 		// key = Balanced_Class-staticmethod-method
 		return array(

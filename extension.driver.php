@@ -49,6 +49,11 @@ class Extension_Balanced extends Extension {
 				'page' => '/system/preferences/',
 				'delegate' => 'Save',
 				'callback' => 'actionSave'
+			),
+			array(
+				'page' => '/frontend/',
+				'delegate' => 'FrontendParamsResolve',
+				'callback' => 'actionAppendAppParams'
 			)
 		);
 	}
@@ -159,14 +164,19 @@ class Extension_Balanced extends Extension {
 								break;
 							case 'Balanced_Debit-create':
 								$balancedCustomer = Balanced\Customer::get($fields['customer_uri']);
+								$appearsText = Symphony::Configuration()->get('appears-on-statement-as', 'balanced');
+								if (isset($fields['appears_on_statement_as'])) {
+									$appearsText = $fields['appears_on_statement_as'];
+								}
 								$balanced = $balancedCustomer->debit(
 									$amount = Balanced_General::dollarsToCents($fields['amount']),
-									$appears_on_statement_as = $fields['appears_on_statement_as'],
+									$appears_on_statement_as = $appearsText,
 									$meta = $fields['meta'],
 									$description = $fields['description'],
 									$source = $fields['source_uri'],
 									$on_behalf_of = $fields['on_behalf_of_uri']
 								);
+								$prefixDebit = true;
 								break;
 							case 'Balanced_Debit-refund':
 								$balancedCustomer = Balanced\Debit::get($fields['debit_uri']);
@@ -308,11 +318,16 @@ class Extension_Balanced extends Extension {
 				}
 			}
 
+			// Prefix response, e.g., bank_verification
 			if (isset($prefix)) {
 				foreach ($balanced as $key => $value) {
 					$balanced[$prefix . $key] = $value;
 					unset($balanced[$key]);
 				}
+			}
+			if (isset($prefixDebit) && ($prefixDebit === true)) {
+				$balanced['customer_uri'] = $balanced['customer']['uri'];
+				$balanced['on_behalf_of_uri'] = $balanced['on_behalf_of']['uri'];
 			}
 
 			// Add values of response for Symphony event to process
@@ -476,22 +491,9 @@ class Extension_Balanced extends Extension {
 		return Symphony::Configuration()->write();
 	}
 
-//    public function fetchNavigation() {
-//        return array(
-//            array(
-//                'location' => 1000,
-//                'name' => __('Balanced'),
-//                'children' => array(
-//                    array(
-//                        'name' => __('Plans'),
-//                        'link' => '/plans/'
-//                    ),
-//                    array(
-//                        'name' => __('Coupons'),
-//                        'link' => '/coupons/'
-//                    )
-//                )
-//            )
-//        );
-//    }
+	public function actionAppendAppParams($context) {
+		// Add marketplace URI to Symphony page params.
+		$context['params']['balanced-marketplace-uri'] = Balanced_General::getMarketplaceUri();
+	}
+
 }
