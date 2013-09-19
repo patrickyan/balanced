@@ -182,13 +182,14 @@ class Extension_Balanced extends Extension {
 								if (isset($fields['appears_on_statement_as'])) {
 									$appearsText = $fields['appears_on_statement_as'];
 								}
+								$onBehalfOfURI = $fields['on_behalf_of_uri'];
 								$balanced = $balancedCustomer->debit(
 									$amount = $fields['amount'],
 									$appears_on_statement_as = $appearsText,
 									$meta = $fields['meta'],
 									$description = $fields['description'],
 									$source = $fields['source_uri'],
-									$on_behalf_of = $fields['on_behalf_of_uri']
+									$on_behalf_of = $onBehalfOfURI
 								);
 								$prefixDebit = true;
 								break;
@@ -340,6 +341,12 @@ class Extension_Balanced extends Extension {
 					if(is_object($val)) {
 						$balanced[$key] = Balanced_General::convertObjectToArray($val);
 					}
+					// rename the underscore-first keys
+					if ($key[0] === '_') {
+						$newKey = substr($key, 1);
+						$balanced[$newKey] = $val;
+						unset($balanced[$key]);
+					}
 				}
 			}
 
@@ -355,7 +362,13 @@ class Extension_Balanced extends Extension {
 			}
 			if (isset($prefixDebit) && ($prefixDebit === true)) {
 				$balanced['customer_uri'] = $balanced['customer']['uri'];
-				$balanced['on_behalf_of_uri'] = $balanced['on_behalf_of']['uri'];
+				// Workaround to provide current on_behalf_of_uri
+				$balanced['on_behalf_of_uri'] = $onBehalfOfURI;
+			}
+
+			// Remove the Balanced ID
+			if (isset($balanced['id'])) {
+				unset($balanced['id']);
 			}
 
 			// Add values of response for Symphony event to process
