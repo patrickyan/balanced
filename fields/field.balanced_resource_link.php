@@ -3,12 +3,12 @@
 require_once(EXTENSIONS . "/selectbox_link_field/fields/field.selectbox_link.php");
 if (!defined('__IN_SYMPHONY__')) die('<h2>Symphony Error</h2><p>You cannot directly access this file</p>');
 
-Class FieldBalanced_Customer_Link extends FieldSelectBox_Link {
+Class FieldBalanced_Resource_Link extends FieldSelectBox_Link {
 
 
 	public function __construct() {
 		parent::__construct();
-		$this->_name = __('Balanced: Customer Link');
+		$this->_name = __('Balanced: Resource Link');
 		$this->_required = true;
 		$this->_showassociation = true;
 
@@ -22,12 +22,12 @@ Class FieldBalanced_Customer_Link extends FieldSelectBox_Link {
 	public function processRawFieldData($data, &$status, &$message = null, $simulate = false, $entry_id = null) {
 		$status = self::__OK__;
 
-		if (!is_array($data)) return array('relation_id' => $this->findEntryIdFromCustomerURI($data));
+		if (!is_array($data)) return array('relation_id' => $this->findEntryIdFromResourceURI($data));
 
 		$result = array();
 
 		foreach ($data as $a => $value) {
-			$result['relation_id'][] = $this->findEntryIdFromCustomerURI($value);
+			$result['relation_id'][] = $this->findEntryIdFromResourceURI($value);
 		}
 
 		return $result;
@@ -46,7 +46,7 @@ Class FieldBalanced_Customer_Link extends FieldSelectBox_Link {
 
 		// Custom
 		if(preg_match('/^cus_/i', $data[0])) {
-			$data[0] = $this->findEntryIdFromCustomerURI($data[0]);
+			$data[0] = $this->findEntryIdFromResourceURI($data[0]);
 		}
 		// End Custom
 
@@ -158,10 +158,10 @@ Class FieldBalanced_Customer_Link extends FieldSelectBox_Link {
 		return true;
 	}
 
-	public function findEntryIdFromCustomerURI($data) {
+	public function findEntryIdFromResourceURI($data) {
 		$field = Symphony::Database()->fetchRow(0, "
 				SELECT `id` FROM `tbl_fields`
-				WHERE `type` = 'balanced_customer_uri'
+				WHERE `type` = 'balanced_resource_uri'
 				LIMIT 1"
 		);
 
@@ -175,10 +175,10 @@ Class FieldBalanced_Customer_Link extends FieldSelectBox_Link {
 		return $entry['entry_id'];
 	}
 
-	public function findCustomerURIFromEntryId($data) {
+	public function findResourceURIFromEntryId($data) {
 		$field = Symphony::Database()->fetchRow(0, "
 				SELECT `id` FROM `tbl_fields`
-				WHERE `type` = 'balanced_customer_uri'
+				WHERE `type` = 'balanced_resource_uri'
 				LIMIT 1"
 		);
 
@@ -198,7 +198,7 @@ Class FieldBalanced_Customer_Link extends FieldSelectBox_Link {
 
 	public function displayPublishPanel(XMLElement &$wrapper, $data = null, $flagWithError = null, $fieldnamePrefix = null, $fieldnamePostfix = null, $entry_id = null) {
 //       print_r($data);
-		$value = General::sanitize($this->findCustomerURIFromEntryId($data['relation_id']));
+		$value = General::sanitize($this->findResourceURIFromEntryId($data['relation_id']));
 		$label = Widget::Label($this->get('label'));
 		$label->appendChild(Widget::Input('fields' . $fieldnamePrefix . '[' . $this->get('element_name') . ']' . $fieldnamePostfix, (strlen($value) != 0 ? $value : NULL), 'text'));
 
@@ -224,7 +224,7 @@ Class FieldBalanced_Customer_Link extends FieldSelectBox_Link {
 
 			$fields = array();
 			foreach ($section_fields as $f) {
-				if ($f->get('id') != $this->get('id') && $f->canPrePopulate() && $f->get('type') == 'balanced_customer_uri') {
+				if ($f->get('id') != $this->get('id') && $f->canPrePopulate() && $f->get('type') == 'balanced_resource_uri') {
 					$fields[] = array(
 						$f->get('id'),
 						is_array($this->get('related_field_id')) ? in_array($f->get('id'), $this->get('related_field_id')) : false,

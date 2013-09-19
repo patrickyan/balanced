@@ -193,8 +193,8 @@ class Extension_Balanced extends Extension {
 								$prefixDebit = true;
 								break;
 							case 'Balanced_Debit-refund':
-								$balancedCustomer = Balanced\Debit::get($fields['debit_uri']);
-								$balanced = $balancedCustomer->refund();
+								$balancedDebit = Balanced\Debit::get($fields['debit_uri']);
+								$balanced = $balancedDebit->refund();
 								$prefix = 'refund_';
 								break;
 							case 'Balanced_Credit-create':
@@ -501,12 +501,39 @@ class Extension_Balanced extends Extension {
 			  KEY `field_id` (`field_id`)
 			) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 		");
+
+		// Create balanced_resource_uri
+		Symphony::Database()->query("
+			CREATE TABLE IF NOT EXISTS `tbl_fields_balanced_resource_uri` (
+			 `id` INT(11) unsigned NOT NULL AUTO_INCREMENT,
+			  `field_id` INT(11) unsigned NOT NULL,
+			  `validator` VARCHAR(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+			  `disabled` enum('yes','no') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'yes',
+			  PRIMARY KEY (`id`),
+			  KEY `field_id` (`field_id`)
+			) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+		");
+
+		// Create balanced_resource_link field database:
+		Symphony::Database()->query("
+			CREATE TABLE IF NOT EXISTS `tbl_fields_balanced_resource_link` (
+			  `id` INT(11) unsigned NOT NULL AUTO_INCREMENT,
+			  `field_id` INT(11) unsigned NOT NULL,
+			  `related_field_id` VARCHAR(255) NOT NULL,
+			  `show_association` enum('yes','no') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'yes',
+			  `disabled` enum('yes','no') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'yes',
+			  PRIMARY KEY (`id`),
+			  KEY `field_id` (`field_id`)
+			) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+		");
 	}
 
 	public function uninstall() {
 		// Drop field tables:
 		Symphony::Database()->query("DROP TABLE `tbl_fields_balanced_customer_uri`");
 		Symphony::Database()->query("DROP TABLE `tbl_fields_balanced_customer_link`");
+		Symphony::Database()->query("DROP TABLE `tbl_fields_balanced_resource_uri`");
+		Symphony::Database()->query("DROP TABLE `tbl_fields_balanced_resource_link`");
 
 		// Clean configuration
 		Symphony::Configuration()->remove('gateway-mode', 'balanced');
