@@ -235,7 +235,3 @@ FAQ
 ### Why do I get the error "Argument 2 passed to SectionEvent::processPreSaveFilters() must be of the type array"?
 
 Your page must include at least one input for a Symphony field, i.e. you cannot create a form with only `balanced[]` fields. If you do not want to pass any non-Balanced fields for your section, simply add `<input name="fields[]" type="hidden"/>` to your form.
-
-
-Release notes
---------
