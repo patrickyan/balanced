@@ -109,14 +109,27 @@ class Extension_Balanced extends Extension {
 				}
 			}
 
+			$debitFeeVariable = Symphony::Configuration()->get('debit-fee-variable', 'balanced');
+			$debitFeeFixed = Symphony::Configuration()->get('debit-fee-fixed', 'balanced');
+			$creditFeeVariable = Symphony::Configuration()->get('credit-fee-variable', 'balanced');
+			$creditFeeFixed = Symphony::Configuration()->get('credit-fee-fixed', 'balanced');
+
 			// Convert dollars into cents
-			if(isset($fields['amount'])) {
+			if (isset($fields['subamount'])) {
+				$fields['subamount'] = Balanced_General::dollarsToCents($fields['subamount']);
+				$subamount = $fields['subamount'];
+			}
+			if (isset($fields['fees'])) {
+				$fields['fees'] = Balanced_General::dollarsToCents($fields['fees']);
+				$fees = $fields['fees'];
+			}
+			if (isset($fields['amount'])) {
 				$fields['amount'] = Balanced_General::dollarsToCents($fields['amount']);
 			}
-			if(isset($fields['amount_1'])) {
+			if (isset($fields['amount_1'])) {
 				$fields['amount_1'] = Balanced_General::dollarsToCents($fields['amount_1']);
 			}
-			if(isset($fields['amount_1'])) {
+			if (isset($fields['amount_1'])) {
 				$fields['amount_1'] = Balanced_General::dollarsToCents($fields['amount_1']);
 			}
 
@@ -178,11 +191,22 @@ class Extension_Balanced extends Extension {
 								break;
 							case 'Balanced_Debit-create':
 								$balancedCustomer = Balanced\Customer::get($fields['customer_uri']);
+
 								$appearsText = Symphony::Configuration()->get('appears-on-statement-as', 'balanced');
 								if (isset($fields['appears_on_statement_as'])) {
 									$appearsText = $fields['appears_on_statement_as'];
 								}
+
 								$onBehalfOfURI = $fields['on_behalf_of_uri'];
+
+								// Add fees if subamount is specified
+								if (isset($fields['subamount'])) {
+									if (!isset($fields['fees']) || ($fields['fees'] == '')) {
+										$fees = Balanced_General::calculateFees($subamount, $debitFeeVariable, $debitFeeFixed);
+									}
+									$fields['amount'] = $subamount + $fees;
+								}
+
 								$balanced = $balancedCustomer->debit(
 									$amount = $fields['amount'],
 									$appears_on_statement_as = $appearsText,
@@ -200,10 +224,20 @@ class Extension_Balanced extends Extension {
 								break;
 							case 'Balanced_Credit-create':
 								$balancedBankAccount = Balanced\BankAccount::get($fields['bank_account_uri']);
+
 								$appearsText = Symphony::Configuration()->get('appears-on-statement-as', 'balanced');
 								if (isset($fields['appears_on_statement_as'])) {
 									$appearsText = $fields['appears_on_statement_as'];
 								}
+
+								// Add fees if subamount is specified
+								if (isset($fields['subamount'])) {
+									if (!isset($fields['fees']) || ($fields['fees'] == '')) {
+										$fees = Balanced_General::calculateFees($subamount, $creditFeeVariable, $creditFeeFixed);
+									}
+									$fields['amount'] = $subamount - $fees;
+								}
+
 								$balanced = $balancedBankAccount->credit(
 									$amount = $fields['amount'],
 									$appears_on_statement_as = $appearsText,
@@ -350,8 +384,25 @@ class Extension_Balanced extends Extension {
 				}
 			}
 
-			// Convert amount back to dollars
+			// Convert cents back to dollars
 			$balanced['amount'] = Balanced_General::centsToDollars($balanced['amount']);
+			$balanced['amount_1'] = Balanced_General::centsToDollars($balanced['amount_1']);
+			$balanced['amount_2'] = Balanced_General::centsToDollars($balanced['amount_2']);
+			// Convert cents back to dollars and add back to array
+			if (isset($subamount)) {
+				$balanced['subamount'] = Balanced_General::centsToDollars($subamount);
+			}
+			else {
+				$balanced['subamount'] = $balanced['amount'];
+			}
+			if (isset($fees)) {
+				$balanced['fees'] = Balanced_General::centsToDollars($fees);
+			}
+			else {
+				if (isset($fields['amount'])) {
+					$balanced['fees'] = '0.0';
+				}
+			}
 
 			// Prefix response, e.g., bank_verification
 			if (isset($prefix)) {
@@ -378,7 +429,7 @@ class Extension_Balanced extends Extension {
 				$context['fields'] = Balanced_General::addBalancedFieldsToSymphonyEventFields($balanced);
 			}
 
-			// Reset the Bank Account Verification fields
+			// Reset the Bank Account Verification fields if cleared by new Bank Account
 			if (isset($balancedClearBankAccountVerification) && ($balancedClearBankAccountVerification === true)) {
 				$context['fields']['bank-account-verification-type'] = '';
 				$context['fields']['bank-account-verification-created-at'] = '';
@@ -428,37 +479,39 @@ class Extension_Balanced extends Extension {
 		$div->appendChild($label);
 		$fieldset->appendChild($div);
 
+		// API Keys group div
 		$group = new XMLElement('div', null, array('class' => 'group'));
 
 		// Live Public API Key
 		$label = new XMLElement('label', __('Live API key secret'));
 		$label->appendChild(
-			Widget::Input('settings[balanced][live-api-key]', Symphony::Configuration()->get("live-api-key", 'balanced'))
+			Widget::Input('settings[balanced][live-api-key]', Symphony::Configuration()->get('live-api-key', 'balanced'))
 		);
 		$group->appendChild($label);
 
 		// Test Public API Key
 		$label = new XMLElement('label', __('Test API key secret'));
 		$label->appendChild(
-			Widget::Input('settings[balanced][test-api-key]', Symphony::Configuration()->get("test-api-key", 'balanced'))
+			Widget::Input('settings[balanced][test-api-key]', Symphony::Configuration()->get('test-api-key', 'balanced'))
 		);
 		$group->appendChild($label);
 
 		$fieldset->appendChild($group);
 
+		// Marketplace URIs group div
 		$group = new XMLElement('div', null, array('class' => 'group'));
 
 		// Live Marketplace URI
 		$label = new XMLElement('label', __('Live Marketplace URI'));
 		$label->appendChild(
-			Widget::Input('settings[balanced][live-marketplace-uri]', Symphony::Configuration()->get("live-marketplace-uri", 'balanced'))
+			Widget::Input('settings[balanced][live-marketplace-uri]', Symphony::Configuration()->get('live-marketplace-uri', 'balanced'))
 		);
 		$group->appendChild($label);
 
 		// Test Marketplace URI
 		$label = new XMLElement('label', __('Test Marketplace URI'));
 		$label->appendChild(
-			Widget::Input('settings[balanced][test-marketplace-uri]', Symphony::Configuration()->get("test-marketplace-uri", 'balanced'))
+			Widget::Input('settings[balanced][test-marketplace-uri]', Symphony::Configuration()->get('test-marketplace-uri', 'balanced'))
 		);
 		$group->appendChild($label);
 
@@ -468,10 +521,48 @@ class Extension_Balanced extends Extension {
 		$div = new XMLElement('div', null);
 		$label = new XMLElement('label', __('Appears On Statement As (18 characters max)'));
 		$label->appendChild(
-			Widget::Input('settings[balanced][appears-on-statement-as]', Symphony::Configuration()->get("appears-on-statement-as", 'balanced'))
+			Widget::Input('settings[balanced][appears-on-statement-as]', Symphony::Configuration()->get('appears-on-statement-as', 'balanced'))
 		);
 		$div->appendChild($label);
 		$fieldset->appendChild($div);
+
+		// Debit fees group div
+		$group = new XMLElement('div', null, array('class' => 'group'));
+
+		// Debit variable fee
+		$label = new XMLElement('label', __('Debit variable fee (in percent, e.g., 5%)'));
+		$label->appendChild(
+			Widget::Input('settings[balanced][debit-fee-variable]', Symphony::Configuration()->get('debit-fee-variable', 'balanced'))
+		);
+		$group->appendChild($label);
+
+		// Debit fixed fee
+		$label = new XMLElement('label', __('Debit fixed fee (in dollars, e.g., 1.50)'));
+		$label->appendChild(
+			Widget::Input('settings[balanced][debit-fee-fixed]', Symphony::Configuration()->get('debit-fee-fixed', 'balanced'))
+		);
+		$group->appendChild($label);
+
+		$fieldset->appendChild($group);
+
+		// Credit fees group div
+		$group = new XMLElement('div', null, array('class' => 'group'));
+
+		// Credit variable fee
+		$label = new XMLElement('label', __('Credit variable fee (in percent, e.g., 5%)'));
+		$label->appendChild(
+			Widget::Input('settings[balanced][credit-fee-variable]', Symphony::Configuration()->get('credit-fee-variable', 'balanced'))
+		);
+		$group->appendChild($label);
+
+		// Credit fixed fee
+		$label = new XMLElement('label', __('Credit fixed fee (in dollars, e.g., 1.50)'));
+		$label->appendChild(
+			Widget::Input('settings[balanced][credit-fee-fixed]', Symphony::Configuration()->get('credit-fee-fixed', 'balanced'))
+		);
+		$group->appendChild($label);
+
+		$fieldset->appendChild($group);
 
 		$context['wrapper']->appendChild($fieldset);
 	}
@@ -485,6 +576,10 @@ class Extension_Balanced extends Extension {
 		Symphony::Configuration()->set('live-marketplace-uri', $settings['balanced']['live-marketplace-uri'], 'balanced');
 		Symphony::Configuration()->set('test-marketplace-uri', $settings['balanced']['test-marketplace-uri'], 'balanced');
 		Symphony::Configuration()->set('appears-on-statement-as', $settings['balanced']['appears-on-statement-as'], 'balanced');
+		Symphony::Configuration()->set('debit-fee-variable', $settings['balanced']['debit-ee-variable'], 'balanced');
+		Symphony::Configuration()->set('debit-fee-fixed', $settings['balanced']['debit-fee-fixed'], 'balanced');
+		Symphony::Configuration()->set('credit-fee-variable', $settings['balanced']['credit-ee-variable'], 'balanced');
+		Symphony::Configuration()->set('credit-fee-fixed', $settings['balanced']['credit-fee-fixed'], 'balanced');
 
 		return Symphony::Configuration()->write();
 	}
@@ -555,6 +650,10 @@ class Extension_Balanced extends Extension {
 		Symphony::Configuration()->remove('live-marketplace-uri', 'balanced');
 		Symphony::Configuration()->remove('test-marketplace-uri', 'balanced');
 		Symphony::Configuration()->remove('appears-on-statement-as', 'balanced');
+		Symphony::Configuration()->remove('debit-fee-variable', 'balanced');
+		Symphony::Configuration()->remove('debit-fee-fixed', 'balanced');
+		Symphony::Configuration()->remove('credit-fee-variable', 'balanced');
+		Symphony::Configuration()->remove('credit-fee-fixed', 'balanced');
 
 		return Symphony::Configuration()->write();
 	}

@@ -68,6 +68,21 @@ Abstract Class Balanced_General {
 		return floor( $cents ) / 100;
 	}
 
+	public static function calculateFees($subamount, $feeVariable, $feeFixed) {
+		$fees = 0;
+		if (isset($feeVariable)) {
+			if (substr($feeVariable,-1) === '%') {
+				$feeVariable = rtrim($feeVariable, '%');
+			}
+			$fees = $subamount * $feeVariable / 100;
+		}
+		if (isset($feeFixed)) {
+			$fees = $fees + self::dollarsToCents($feeFixed);
+		}
+
+		return ceil( $fees );
+	}
+
 	public static function contentUrl() {
 		return SYMPHONY_URL . '/extension/balanced/';
 	}
