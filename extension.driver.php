@@ -41,6 +41,16 @@ class Extension_Balanced extends Extension {
 				'callback' => 'actionEventPostSaveFilter'
 			),
 			array(
+				'page' => '*',
+				'delegate' => 'SE_PrepareFilter',
+				'callback' => 'actionEventPreSaveFilter'
+			),
+			array(
+				'page' => '*',
+				'delegate' => 'SE_CommitFilter',
+				'callback' => 'actionEventPostSaveFilter'
+			),
+			array(
 				'page' => '/system/preferences/',
 				'delegate' => 'AddCustomPreferenceFieldsets',
 				'callback' => 'actionAddCustomPreferenceFieldsets'
@@ -84,6 +94,9 @@ class Extension_Balanced extends Extension {
 
 	public function actionEventPreSaveFilter($context) {
 		$filters = $context['event']->eParamFILTERS;
+		if(!isset($filters)) {
+			$filters = $context['filters'];
+		}
 		$proceed = false;
 
 		foreach ($filters as $key => $val) {
@@ -100,6 +113,9 @@ class Extension_Balanced extends Extension {
 			Balanced\Settings::$api_key = Balanced_General::getApiKey();
 
 			$fields = $_POST['balanced'];
+			if(!isset($fields)) {
+				$fields = $context['fields']['balanced'];
+			}
 
 			if (isset($fields)) {
 				// Convert handles if Symphony standard
@@ -442,7 +458,13 @@ class Extension_Balanced extends Extension {
 			}
 
 			// Create the post data cookie element
-			General::array_to_xml($context['post_values'], $balanced, true);
+			if ( isset($context['post_values']) ) {
+				General::array_to_xml($context['post_values'], $balanced, true);
+			}
+			else {
+				$context['post_values'] = new XMLElement('post-values');
+				General::array_to_xml($context['post_values'], $balanced, true);
+			}
 
 			// Add balanced response to session in case event fails
 			$_SESSION['symphony-balanced'] = serialize($balanced);
