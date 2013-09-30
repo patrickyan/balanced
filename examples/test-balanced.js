@@ -2,7 +2,7 @@
 // go to http://requestb.in/
 // click create new request bin and COPY that URL without the ?inspect at the end
 
-var marketplaceUri = '/v1/marketplaces/TEST-MP5aEqhbBt14ePPxZT8vX0Lw';
+var marketplaceUri = 'YOUR_TEST_MARKETPLACE_URI';
 balanced.init(marketplaceUri);
 
 var clickedFormID;
