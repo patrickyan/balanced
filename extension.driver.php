@@ -231,6 +231,7 @@ class Extension_Balanced extends Extension {
 									$source = $fields['source_uri'],
 									$on_behalf_of = $onBehalfOfURI
 								);
+								$prefix = 'debit_';
 								$prefixDebit = true;
 								break;
 							case 'Balanced_Debit-refund':
@@ -429,6 +430,7 @@ class Extension_Balanced extends Extension {
 			}
 			if (isset($prefixDebit) && ($prefixDebit === true)) {
 				$balanced['customer_uri'] = $balanced['customer']['uri'];
+				//$balanced['source_uri'] = $balanced['source']['uri'];
 				// Workaround to provide current on_behalf_of_uri
 				$balanced['on_behalf_of_uri'] = $onBehalfOfURI;
 			}
