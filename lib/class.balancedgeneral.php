@@ -110,7 +110,6 @@ Abstract Class Balanced_General {
 	}
 
 	public static function addBalancedFieldsToSymphonyEventFields($response) {
-//print_r($response); die();
 		foreach ($response as $key => $val) {
 			$key = str_replace('_', '-', $key);
 			if (!is_object($val) && !is_array($val) && !empty($val)) {
@@ -118,7 +117,7 @@ Abstract Class Balanced_General {
 			} elseif (!is_object($val) && !empty($val)) {
 				foreach($val as $k => $v) {
 					if(!empty($v)) {
-						$key = str_replace('_', '-', $k);
+						$k = str_replace('_', '-', $k);
 						$result[$key . '-' . $k] = $v;
 					}
 				}
