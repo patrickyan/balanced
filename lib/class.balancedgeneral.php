@@ -6,6 +6,8 @@ Httpful\Bootstrap::init();
 RESTful\Bootstrap::init();
 Balanced\Bootstrap::init();
 
+Balanced\Settings::$api_key = Balanced_General::getApiKey();
+
 Abstract Class Balanced_General {
 
 	/**
@@ -109,7 +111,7 @@ Abstract Class Balanced_General {
 		return $object;
 	}
 
-	public static function addBalancedFieldsToSymphonyEventFields($response) {
+	public static function prepareFieldsForSymphony($response) {
 		foreach ($response as $key => $val) {
 			$key = str_replace('_', '-', $key);
 			if (!is_object($val) && !is_array($val) && !empty($val)) {
@@ -121,24 +123,204 @@ Abstract Class Balanced_General {
 						$result[$key . '-' . $k] = $v;
 					}
 				}
-				self::addBalancedFieldsToSymphonyEventFields($result);
+				self::prepareFieldsForSymphony($result);
 			}
+		}
+		return $result;
+	}
+
+	public static function translateFields($response) {
+		$result = array();
+		foreach ($response as $key => $val) {
+			if ($key[0] === '_') {
+				$key = substr($key, 1);
+			}
+			if (is_numeric($key[0])) {
+				$key = 'i-' . $key;
+			}
+			if (is_numeric($key)) {
+				$key = 'i-' . $key;
+			}
+			$key = str_replace('_', '-', $key);
+			if (is_array($val)) {
+				$val = self::translateFields($val);
+			}
+			$result[$key] = $val;
 		}
 		return $result;
 	}
 
 	public static function convertObjectToArray($data)
 	{
-	    if (is_array($data) || is_object($data))
-	    {
-	        $result = array();
-	        foreach ($data as $key => $value)
-	        {
-	            $result[$key] = self::convertObjectToArray($value);
-	        }
-	        return $result;
-	    }
-	    return $data;
+		if (is_array($data) || is_object($data))
+		{
+			$result = array();
+			foreach ($data as $key => $value)
+			{
+				$result[$key] = self::convertObjectToArray($value);
+			}
+			return $result;
+		}
+		return $data;
+	}
+
+	public static function getType($uri)
+	{
+		$types = array(
+			/*
+			'entity' => array (
+				'uri search string',
+				'Method name',
+			)
+			*/
+			'customer' => array(
+				'/customers/',
+				'Balanced\Customer',
+			),
+			'card' => array(
+				'/cards/',
+				'Balanced\Card',
+			),
+			'bank-account' => array(
+				'/bank_accounts/',
+				'Balanced\BankAccount',
+			),
+			'bank-account-verification' => array(
+				'/verifications/',
+				'Balanced\BankAccountVerification',
+			),
+			'credit' => array(
+				'/credits/',
+				'Balanced\Credit',
+			),
+			'debit' => array(
+				'/debits/',
+				'Balanced\Debit',
+			),
+			'hold' => array(
+				'/holds/',
+				'Balanced\Hold',
+			),
+			'refund' => array(
+				'/refunds/',
+				'Balanced\Refund',
+			),
+			'event' => array(
+				'/events/',
+				'Balanced\Event',
+			),
+		);
+
+		$type = null;
+
+		foreach ($types as $haystack => $item) {
+			if (strpos($uri, $item[0]) !== false) {
+				$type = $haystack;
+				break;
+			}
+		}
+
+		return $type;
+
+	}
+
+	public static function retrieveEntities(array $uris)
+	{
+		$result = array();
+		$index = 0;
+		foreach ($uris as $key => $value) {
+			$uritype = self::getType($value);
+
+			try {
+				switch($uritype) {
+					case 'customer':
+						$getitem = Balanced\Customer::get($value);
+						break;
+					case 'card':
+						$getitem = Balanced\Card::get($value);
+						break;
+					case 'bank-account':
+						$getitem = Balanced\BankAccount::get($value);
+						break;
+					case 'bank-account-verification':
+						$getitem = Balanced\BankAccountVerification::get($value);
+						break;
+					case 'credit':
+						$getitem = Balanced\Credit::get($value);
+						break;
+					case 'debit':
+						$getitem = Balanced\Debit::get($value);
+						break;
+					case 'hold':
+						$getitem = Balanced\Hold::get($value);
+						break;
+					case 'refund':
+						$getitem = Balanced\Refund::get($value);
+						break;
+					case 'event':
+						$getitem = Balanced\Event::get($value);
+						break;
+				}
+				$getitem = self::convertObjectToArray($getitem);
+
+				$result[$index][$uritype] = self::translateFields($getitem);
+				$index++;
+
+			} catch (Exception $e) {
+
+			}
+		}
+		return $result;
+	}
+
+	/**
+	 * Build retrieved results based on an array of items and add all nested items.
+	 *
+	 * @param XMLElement $parent
+	 *  The element the items should be added to
+	 * @param array $items
+	 *  The items array
+	 * @param boolean $count_as_attribute
+	 *  If set to true, counts will be added as attributes
+	 */
+	public static function buildXML($parent, $items) {
+		if(!is_array($items)) return;
+		// Create groups
+		foreach($items as $key => $value) {
+			self::itemsToXML($parent, $value);
+		}
+
+	}
+
+
+	/**
+	 * Convert an array of items to XML, setting all counts as variables.
+	 *
+	 * @param XMLElement $parent
+	 *  The element the items should be added to
+	 * @param array $items
+	 *  The items array
+	 * @param boolean $count_as_attribute
+	 *  If set to true, counts will be added as attributes
+	 */
+	public static function itemsToXML($parent, $items) {
+		if(!is_array($items)) return;
+
+		foreach($items as $key => $value) {
+			$item = new XMLElement($key);
+
+			// Nested items
+			if(is_array($value)) {
+				self::itemsToXML($item, $value);
+				$parent->appendChild($item);
+			}
+
+			// Other values
+			else {
+				$item->setValue(General::sanitize($value));
+				$parent->appendChild($item);
+			}
+		}
 	}
 
 

@@ -64,7 +64,7 @@
 		}
 
 		private function __addFields($event, $type) {
-			$response = Balanced_General::addBalancedFieldsToSymphonyEventFields($event['entity']);
+			$response = Balanced_General::prepareFieldsForSymphony($event['entity']);
 			// Rename ambiguious URIs
 			$response['entity-uri'] = $event['entity']['uri'];
 			unset($response['uri']);

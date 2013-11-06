@@ -1,8 +1,32 @@
 <?php
 
+require_once EXTENSIONS . '/balanced/data-sources/datasource.balanced.php';
 require_once(EXTENSIONS . '/balanced/lib/class.balancedgeneral.php');
 
 class Extension_Balanced extends Extension {
+
+	private static $provides = array();
+
+	public static function registerProviders() {
+		self::$provides = array(
+			'data-sources' => array(
+				'BalancedDatasource' => BalancedDatasource::getName()
+			)
+		);
+
+		return true;
+	}
+
+	public static function providerOf($type = null) {
+		self::registerProviders();
+
+		if(is_null($type)) return self::$provides;
+
+		if(!isset(self::$provides[$type])) return array();
+
+		return self::$provides[$type];
+	}
+
 
 	/*-------------------------------------------------------------------------
 		Delegates:
@@ -109,8 +133,6 @@ class Extension_Balanced extends Extension {
 		//print_r($_POST); die();
 
 		//if(!isset($_SESSION['symphony-balanced'])) {
-
-			Balanced\Settings::$api_key = Balanced_General::getApiKey();
 
 			$fields = $_POST['balanced'];
 			if(!isset($fields)) {
@@ -455,9 +477,9 @@ class Extension_Balanced extends Extension {
 
 			// Add values of response for Symphony event to process
 			if(is_array($context['fields'])) {
-				$context['fields'] = array_merge(Balanced_General::addBalancedFieldsToSymphonyEventFields($balanced), $context['fields']);
+				$context['fields'] = array_merge(Balanced_General::prepareFieldsForSymphony($balanced), $context['fields']);
 			} else {
-				$context['fields'] = Balanced_General::addBalancedFieldsToSymphonyEventFields($balanced);
+				$context['fields'] = Balanced_General::prepareFieldsForSymphony($balanced);
 			}
 
 			// Reset the Bank Account Verification fields if cleared by new Bank Account
