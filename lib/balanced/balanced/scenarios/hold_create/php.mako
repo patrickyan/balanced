@@ -1,5 +1,5 @@
-% if mode == 'definition':
-Balanced\Buyer->hold()
+%if mode == 'definition':
+\Balanced\Marketplace::mine()->holds->create()
 
 % else:
 <?php
@@ -10,11 +10,14 @@ Httpful\Bootstrap::init();
 RESTful\Bootstrap::init();
 Balanced\Bootstrap::init();
 
-Balanced\Settings::$api_key = "2fd37702d33511e2a00f026ba7d31e6f";
+Balanced\Settings::$api_key = "ak-test-2KZfoLyijij3Y6OyhDAvFRF9tXzelBLpD";
 
-$buyer = Balanced\Account::get("");
-$buyer->hold(
-    "5000",
-    "Some descriptive text for the debit in the dashboard"
-);
-% endif
+$marketplace = \Balanced\Marketplace::mine();
+$hold = $marketplace->holds->create(array(
+  "amount" => 5000,
+  "description" => "Some descriptive text for the debit in the dashboard",
+  "source_uri" => "/v1/marketplaces/TEST-MP4K6K0PWGyPtXL4LZ42sQSb/cards/CC72hXVwWbCJsozvJoRELzIc"
+));
+
+?>
+%endif

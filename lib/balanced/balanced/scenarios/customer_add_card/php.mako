@@ -1,4 +1,4 @@
-% if mode == 'definition':
+%if mode == 'definition':
 \Balanced\Customer->addCard();
 
 % else:
@@ -10,8 +10,10 @@ Httpful\Bootstrap::init();
 RESTful\Bootstrap::init();
 Balanced\Bootstrap::init();
 
-Balanced\Settings::$api_key = "2fd37702d33511e2a00f026ba7d31e6f";
+Balanced\Settings::$api_key = "ak-test-2KZfoLyijij3Y6OyhDAvFRF9tXzelBLpD";
 
-$customer = \Balanced\Customer::get("/v1/customers/CU7GuPv9Y2F8ySwJHuHL0YWq");
-$customer->addCard("/v1/marketplaces/TEST-MP64bmAzypIUS0SUZ4qkoFqG/cards/CC7HVl3IUDtngQOWXk77t3uK");
-% endif
+$customer = \Balanced\Customer::get("/v1/customers/CU70CIWA2NrZwwMQqjBuWFUb");
+$customer->addCard("/v1/marketplaces/TEST-MP4K6K0PWGyPtXL4LZ42sQSb/cards/CC72hXVwWbCJsozvJoRELzIc");
+
+?>
+%endif

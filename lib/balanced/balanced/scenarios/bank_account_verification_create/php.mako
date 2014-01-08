@@ -1,5 +1,5 @@
-% if mode == 'definition':
-\Balanced\Verification->save()
+%if mode == 'definition':
+\Balanced\BankAccountVerification->save()
 
 % else:
 <?php
@@ -10,8 +10,12 @@ Httpful\Bootstrap::init();
 RESTful\Bootstrap::init();
 Balanced\Bootstrap::init();
 
-Balanced\Settings::$api_key = "2fd37702d33511e2a00f026ba7d31e6f";
+Balanced\Settings::$api_key = "ak-test-2KZfoLyijij3Y6OyhDAvFRF9tXzelBLpD";
 
-$bank_account = Balanced\BankAccount::get("/v1/bank_accounts/BA6eYWlzH1IMkOpPYQjRNme4");
+// NOTE: Bank account must be associated with a customer before initiating a verification
+
+$bank_account = Balanced\BankAccount::get("/v1/bank_accounts/BA5gy1b8X8dIGaBWFuoWvkxO");
 $verification = $bank_account->verify();
-% endif
+
+?>
+%endif

@@ -1,0 +1,156 @@
+{
+    "_readme": [
+        "This file locks the dependencies of your project to a known state",
+        "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file"
+    ],
+    "hash": "1cfb6ee19a0e277554089e7c9ac0f3f7",
+    "packages": [
+        {
+            "name": "balanced/balanced",
+            "version": "0.7.5.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/balanced/balanced-php.git",
+                "reference": "753918aa9f7d8e83e52470e07855393aebb8ff88"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/balanced/balanced-php/zipball/753918aa9f7d8e83e52470e07855393aebb8ff88",
+                "reference": "753918aa9f7d8e83e52470e07855393aebb8ff88",
+                "shasum": ""
+            },
+            "require": {
+                "bninja/restful": "*",
+                "nategood/httpful": "0.2.3"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "3.7.*",
+                "twig/twig": "1.*"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "Balanced": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Balanced",
+                    "email": "dev@balancedpayments.com",
+                    "homepage": "http://www.balancedpayments.com"
+                }
+            ],
+            "description": "Client for Balanced API",
+            "homepage": "http://github.com/balanced/balanced-php",
+            "keywords": [
+                "api",
+                "payments"
+            ],
+            "time": "2014-01-03 23:05:30"
+        },
+        {
+            "name": "bninja/restful",
+            "version": "0.1.8",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/bninja/restful.git",
+                "reference": "8e7b7b6733f8503892f180e6c16969e5f808de10"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/bninja/restful/zipball/8e7b7b6733f8503892f180e6c16969e5f808de10",
+                "reference": "8e7b7b6733f8503892f180e6c16969e5f808de10",
+                "shasum": ""
+            },
+            "require": {
+                "nategood/httpful": "*"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "RESTful": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "description": "Library for writing RESTful PHP clients.",
+            "homepage": "http://github.com/bninja/restful",
+            "keywords": [
+                "api",
+                "client",
+                "http",
+                "rest"
+            ],
+            "time": "2013-11-06 22:18:01"
+        },
+        {
+            "name": "nategood/httpful",
+            "version": "0.2.3",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/nategood/httpful.git",
+                "reference": "28c196a019a659bd129a84c08c28e9ae9e22bb42"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/nategood/httpful/zipball/28c196a019a659bd129a84c08c28e9ae9e22bb42",
+                "reference": "28c196a019a659bd129a84c08c28e9ae9e22bb42",
+                "shasum": ""
+            },
+            "require": {
+                "ext-curl": "*",
+                "php": ">=5.3"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "Httpful": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Nate Good",
+                    "email": "me@nategood.com",
+                    "homepage": "http://nategood.com"
+                }
+            ],
+            "description": "A Readable, Chainable, REST friendly, PHP HTTP Client",
+            "homepage": "http://github.com/nategood/httpful",
+            "keywords": [
+                "api",
+                "curl",
+                "http",
+                "requests",
+                "rest",
+                "restful"
+            ],
+            "time": "2013-03-05 04:08:29"
+        }
+    ],
+    "packages-dev": [
+
+    ],
+    "aliases": [
+
+    ],
+    "minimum-stability": "stable",
+    "stability-flags": [
+
+    ],
+    "platform": [
+
+    ],
+    "platform-dev": [
+
+    ]
+}

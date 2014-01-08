@@ -1,4 +1,4 @@
-% if mode == 'definition':
+%if mode == 'definition':
 Balanced\Card->save()
 
 % else:
@@ -10,9 +10,11 @@ Httpful\Bootstrap::init();
 RESTful\Bootstrap::init();
 Balanced\Bootstrap::init();
 
-Balanced\Settings::$api_key = "2fd37702d33511e2a00f026ba7d31e6f";
+Balanced\Settings::$api_key = "ak-test-2KZfoLyijij3Y6OyhDAvFRF9tXzelBLpD";
 
-$card = Balanced\Card::get("/v1/marketplaces/TEST-MP64bmAzypIUS0SUZ4qkoFqG/cards/CC6mSyhNe9lAcrUYtqAxHi1i");
+$card = Balanced\Card::get("/v1/marketplaces/TEST-MP4K6K0PWGyPtXL4LZ42sQSb/cards/CC5N3HHUDrAyvhNwQOoUd3UX");
 $card->is_valid = false;
 $card->save();
-% endif
+
+?>
+%endif

@@ -1,4 +1,4 @@
-% if mode == 'definition':
+%if mode == 'definition':
 Balanced\Marketplace->createAccount();
 
 % else:
@@ -10,7 +10,7 @@ Httpful\Bootstrap::init();
 RESTful\Bootstrap::init();
 Balanced\Bootstrap::init();
 
-Balanced\Settings::$api_key = "2fd37702d33511e2a00f026ba7d31e6f";
+Balanced\Settings::$api_key = "ak-test-2KZfoLyijij3Y6OyhDAvFRF9tXzelBLpD";
 
 $marketplace = Balanced\Marketplace::mine();
 
@@ -41,4 +41,6 @@ try {
     /* TODO: handle 400 and 409 exceptions as required */
     throw $error;
 }
-% endif
+
+?>
+%endif

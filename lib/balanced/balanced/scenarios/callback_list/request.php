@@ -1,1 +1,2 @@
-\Balanced\Callback->all()
+$marketplace = Balanced\Marketplace::mine();
+$callbacks = $marketplace->callbacks->query()->all();

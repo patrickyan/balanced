@@ -105,7 +105,7 @@ class Customer extends Resource
     }
 
     /**
-     * Retieves the most recently added, active \Balanced\BankAccount or null
+     * Retrieves the most recently added, active \Balanced\BankAccount or null
      * if this customer has no active bank accounts.
      *
      * @return \Balanced\BankAccount
@@ -225,5 +225,11 @@ class Customer extends Resource
                 'appears_on_statement_as' => $appears_on_statement_as,
                 'debit_uri' => $debit_uri
         ));
+    }
+    
+    
+    public function unstore()
+    {
+        return $this->delete();
     }
 }

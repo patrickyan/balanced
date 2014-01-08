@@ -1,4 +1,4 @@
-% if mode == 'definition':
+%if mode == 'definition':
 Balanced\Marketplace->createAccount();
 
 % else:
@@ -10,10 +10,12 @@ Httpful\Bootstrap::init();
 RESTful\Bootstrap::init();
 Balanced\Bootstrap::init();
 
-Balanced\Settings::$api_key = "2fd37702d33511e2a00f026ba7d31e6f";
+Balanced\Settings::$api_key = "ak-test-2KZfoLyijij3Y6OyhDAvFRF9tXzelBLpD";
 
 $buyer = Balanced\Marketplace::mine()->createBuyer(
     null,
-    "/v1/marketplaces/TEST-MP64bmAzypIUS0SUZ4qkoFqG/cards/CC6wEPGAzIQmdgiFUO4beyoU"
+    "/v1/marketplaces/TEST-MP4K6K0PWGyPtXL4LZ42sQSb/cards/CC4WeeR0OUiQh9vvqNQvMl1o"
 );
-% endif
+
+?>
+%endif

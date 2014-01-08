@@ -1,4 +1,4 @@
-% if mode == 'definition':
+%if mode == 'definition':
 Balanced\Marketplace::mine()->refunds
 
 % else:
@@ -10,8 +10,10 @@ Httpful\Bootstrap::init();
 RESTful\Bootstrap::init();
 Balanced\Bootstrap::init();
 
-Balanced\Settings::$api_key = "2fd37702d33511e2a00f026ba7d31e6f";
+Balanced\Settings::$api_key = "ak-test-2KZfoLyijij3Y6OyhDAvFRF9tXzelBLpD";
 
 $marketplace = Balanced\Marketplace::mine();
 $refunds = $marketplace->refunds->query()->all();
-% endif
+
+?>
+%endif

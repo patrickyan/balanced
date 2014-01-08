@@ -1,4 +1,4 @@
-% if mode == 'definition':
+%if mode == 'definition':
 Balanced\Errors\InvalidRoutingNumber
 
 % else:
@@ -10,12 +10,12 @@ Httpful\Bootstrap::init();
 RESTful\Bootstrap::init();
 Balanced\Bootstrap::init();
 
-Balanced\Settings::$api_key = "2fd37702d33511e2a00f026ba7d31e6f";
+Balanced\Settings::$api_key = "ak-test-2KZfoLyijij3Y6OyhDAvFRF9tXzelBLpD";
 
 $bank_account = new Balanced\BankAccount(array(
     "account_number" => "9900000001",
     "name" => "Johann Bernoulli",
-    "routing_number" => "111111118",
+    "routing_number" => "100000007",
     "type" => "checking",
 ));
 try {
@@ -24,4 +24,6 @@ try {
 catch(Balanced\Errors\InvalidRoutingNumber $e) {
   // handle error here
 }
-% endif
+
+?>
+%endif

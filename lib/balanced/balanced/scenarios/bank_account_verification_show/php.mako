@@ -1,5 +1,5 @@
-% if mode == 'definition':
-Balanced\Verification::get
+%if mode == 'definition':
+Balanced\BankAccountVerification::get
 
 % else:
 <?php
@@ -10,7 +10,9 @@ Httpful\Bootstrap::init();
 RESTful\Bootstrap::init();
 Balanced\Bootstrap::init();
 
-Balanced\Settings::$api_key = "2fd37702d33511e2a00f026ba7d31e6f";
+Balanced\Settings::$api_key = "ak-test-2KZfoLyijij3Y6OyhDAvFRF9tXzelBLpD";
 
-$verification = Balanced\Verification::get("/v1/bank_accounts/BA6h13dSUEsvVjbhFd2MqdmT/verifications/BZ6hHnC9dKqiQJJtuxbp7SGP");
-% endif
+$verification = Balanced\BankAccountVerification::get("/v1/bank_accounts/BA5nW8SMsXjaU3GVWdhR9d60/verifications/BZ5rcuNvebC49kZyTGAaJu2A");
+
+?>
+%endif

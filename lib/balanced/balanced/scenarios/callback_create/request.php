@@ -1,7 +1,4 @@
-$callback = new \Balanced\Callback(array(
-   {% for k, v in request.payload %}
-        "{{ k }}" => "{{ v }}",
-    {% endfor %}
-    ));
-
-    $callback->save();
+$callback = new Balanced\Callback(array(
+  "url" => "{{ request.payload.url }}"
+));
+$callback->save();

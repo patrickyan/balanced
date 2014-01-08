@@ -1,4 +1,4 @@
-% if mode == 'definition':
+%if mode == 'definition':
 Balanced\Customer->credits()
 
 % else:
@@ -10,8 +10,10 @@ Httpful\Bootstrap::init();
 RESTful\Bootstrap::init();
 Balanced\Bootstrap::init();
 
-Balanced\Settings::$api_key = "2fd37702d33511e2a00f026ba7d31e6f";
+Balanced\Settings::$api_key = "ak-test-2KZfoLyijij3Y6OyhDAvFRF9tXzelBLpD";
 
-$customer = Balanced\Customer::get("/v1/customers/CU6PXyMacKRYKNJPJFKtONK0");
+$customer = Balanced\Customer::get("/v1/customers/CU5f64LhFMO8cf7N1sQSRVOo");
 $credits = $customer->credits->query()->all();
-% endif
+
+?>
+%endif
